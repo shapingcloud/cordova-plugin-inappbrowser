@@ -29,7 +29,10 @@
     <repo>https://git-wip-us.apache.org/repos/asf/cordova-plugin-inappbrowser.git</repo>
     <issue>https://issues.apache.org/jira/browse/CB/component/12320641</issue>
 
-
+    <engines>		
+      <engine name="cordova" version=">=3.1.0" /><!-- Needs cordova/urlutil -->		
+    </engines>
+    
     <!-- android -->
     <platform name="android">
         <js-module src="www/inappbrowser.js" name="inappbrowser">
