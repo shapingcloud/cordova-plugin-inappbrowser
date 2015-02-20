@@ -17,314 +17,190 @@
     under the License.
 -->
 
-# org.apache.cordova.inappbrowser
+# org.apache.cordova.geolocation
 
-이 플러그인은를 호출할 때 표시 하는 웹 브라우저 보기를 제공 합니다.`window.open()`.
+이 플러그인 위도 및 경도 등의 소자의 위치에 대 한 정보를 제공합니다. 일반적인 위치 정보 등 글로벌 포지셔닝 시스템 (GPS) 및 위치와 같은 IP 주소, RFID, WiFi 및 블루투스 MAC 주소 및 GSM/CDMA 셀 Id 네트워크 신호에서 유추 합니다. 보장은 없다는 API 소자의 실제 위치를 반환 합니다.
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    
+이 API [W3C Geolocation API 사양][1]에 기반 하 고 이미 구현을 제공 하지 않는 장치에만 실행 됩니다.
 
-**참고**: 동작 하는 창에 InAppBrowser 표준 웹 브라우저를 좋아하고 코르도바 Api에 액세스할 수 없습니다.
+ [1]: http://dev.w3.org/geo/api/spec-source.html
+
+**경고**: 중요 한 개인 정보 보호 문제를 제기 하는 위치 정보 데이터의 수집 및 사용 합니다. 응용 프로그램의 개인 정보 보호 정책 다른 당사자와의 데이터 (예를 들어, 굵고, 괜 찮 아 요, 우편 번호, 등)의 정밀도 수준을 공유 여부를 app 지리적 데이터를 사용 하는 방법 토론 해야 한다. 그것은 사용자의 행방을 밝힐 수 있기 때문에 및 저장, 그들의 여행 역사 지리적 위치 데이터는 일반적으로 민감한 간주. 따라서, 애플 리 케이 션의 개인 정보 보호 정책 뿐만 아니라 강력 하 게 좋습니다 (해당 되는 경우 장치 운영 체제 이렇게 이미 하지 않는) 응용 프로그램 위치 정보 데이터에 액세스 하기 전에 그냥--시간 통지. 그 통지는 (예를 들어, **확인** 및 **아니오**선택 제시) 하 여 사용자의 허가 취득 뿐만 아니라, 위에서 언급 된 동일한 정보를 제공 해야 합니다. 자세한 내용은 개인 정보 보호 가이드를 참조 하십시오.
 
 ## 설치
 
-    cordova plugin add org.apache.cordova.inappbrowser
+    cordova plugin add org.apache.cordova.geolocation
     
 
-## window.open
-
-새 URL을 엽니다 `InAppBrowser` 인스턴스, 현재 브라우저 인스턴스 또는 시스템 브라우저.
-
-    var ref = window.open(url, target, options);
-    
-
-*   **심판**:에 대 한 참조는 `InAppBrowser` 창. *(InAppBrowser)*
-
-*   **url**: *(문자열)를*로드 하는 URL. 전화 `encodeURI()` 이 경우에는 URL 유니코드 문자를 포함 합니다.
-
-*   **대상**: 대상 URL, 기본적으로 선택적 매개 변수를 로드 하는 `_self` . *(문자열)*
-    
-    *   `_self`: URL 화이트 리스트에 있으면 코르도바 WebView에서 열리고, 그렇지 않으면 열에`InAppBrowser`.
-    *   `_blank`: 준공에`InAppBrowser`.
-    *   `_system`: 시스템의 웹 브라우저에서 엽니다.
-
-*   **옵션**: 옵션은 `InAppBrowser` . 선택적, 디폴트에: `location=yes` . *(문자열)*
-    
-    `options`문자열 텅 빈 어떤 스페이스 포함 해서는 안 그리고 쉼표 각 기능의 이름/값 쌍을 구분 합니다. 기능 이름은 대/소문자입니다. 모든 플랫폼 지원 아래 값:
-    
-    *   **위치**: 설정 `yes` 또는 `no` 설정 하는 `InAppBrowser` 의 위치 표시줄 켜거나 끕니다.
-    
-    안 드 로이드만:
-    
-    *   **closebuttoncaption**: **수행** 하는 단추의 캡션으로 사용할 문자열을 설정 합니다.
-    *   **숨겨진**: 설정 `yes` 브라우저를 만들 페이지를 로드 하면, 하지만 그것을 보여주지. Loadstop 이벤트는 로드가 완료 되 면 발생 합니다. 생략 하거나 설정 `no` (기본값) 브라우저 열고 정상적으로 로드 해야 합니다.
-    *   **clearcache**: 설정 `yes` 브라우저를 쿠키 캐시 삭제 하기 전에 새 창이 열립니다
-    *   **clearsessioncache**: 설정 `yes` 세션 쿠키 캐시를 삭제 하기 전에 새 창이 열립니다
-    
-    iOS만:
-    
-    *   **closebuttoncaption**: **수행** 하는 단추의 캡션으로 사용할 문자열을 설정 합니다. 참고 직접이 값을 지역화 해야 합니다.
-    *   **disallowoverscroll**: 설정 `yes` 또는 `no` (기본값은 `no` ). 회전 온/오프 UIWebViewBounce 속성입니다.
-    *   **숨겨진**: 설정 `yes` 브라우저를 만들 페이지를 로드 하면, 하지만 그것을 보여주지. Loadstop 이벤트는 로드가 완료 되 면 발생 합니다. 생략 하거나 설정 `no` (기본값) 브라우저 열고 정상적으로 로드 해야 합니다.
-    *   **clearcache**: 설정 `yes` 브라우저를 쿠키 캐시 삭제 하기 전에 새 창이 열립니다
-    *   **clearsessioncache**: 설정 `yes` 세션 쿠키 캐시를 삭제 하기 전에 새 창이 열립니다
-    *   **도구 모음**: 설정 `yes` 또는 `no` InAppBrowser (기본값:에 대 한 도구 모음 온 / 오프를 돌기 위하여`yes`)
-    *   **enableViewportScale**: 설정 `yes` 또는 `no` 뷰포트 메타 태그 (기본값:를 통해 확장을 방지 하기 위해`no`).
-    *   **mediaPlaybackRequiresUserAction**: 설정 `yes` 또는 `no` HTML5 오디오 또는 비디오 자동 재생 (기본값에서에서 방지 하기 위해`no`).
-    *   **allowInlineMediaPlayback**: 설정 `yes` 또는 `no` 인라인 HTML5 미디어 재생, 장치 전용 재생 인터페이스 보다는 브라우저 창 내에서 표시할 수 있도록 합니다. HTML의 `video` 요소가 포함 되어야 합니다는 `webkit-playsinline` 특성 (기본값:`no`)
-    *   **keyboardDisplayRequiresUserAction**: 설정 `yes` 또는 `no` 양식 요소는 자바 스크립트를 통해 포커스를 받을 때 키보드를 열고 `focus()` 전화 (기본값:`yes`).
-    *   **suppressesIncrementalRendering**: 설정 `yes` 또는 `no` (기본값을 렌더링 하기 전에 모든 새로운 보기 콘텐츠를 받을 때까지 기다려야`no`).
-    *   **presentationstyle**: 설정 `pagesheet` , `formsheet` 또는 `fullscreen` [프레 젠 테이 션 스타일][1] (기본값을 설정 하려면`fullscreen`).
-    *   **transitionstyle**: 설정 `fliphorizontal` , `crossdissolve` 또는 `coververtical` [전환 스타일][2] (기본값을 설정 하려면`coververtical`).
-    *   **toolbarposition**: 설정 `top` 또는 `bottom` (기본값은 `bottom` ). 위쪽 또는 아래쪽 창에 도구 모음을 발생 합니다.
-    
-    Windows에만 해당:
-    
-    *   **숨겨진**: 설정 `yes` 브라우저를 만들 페이지를 로드 하면, 하지만 그것을 보여주지. Loadstop 이벤트는 로드가 완료 되 면 발생 합니다. 생략 하거나 설정 `no` (기본값) 브라우저 열고 정상적으로 로드 해야 합니다.
-
- [1]: http://developer.apple.com/library/ios/documentation/UIKit/Reference/UIViewController_Class/Reference/Reference.html#//apple_ref/occ/instp/UIViewController/modalPresentationStyle
- [2]: http://developer.apple.com/library/ios/#documentation/UIKit/Reference/UIViewController_Class/Reference/Reference.html#//apple_ref/occ/instp/UIViewController/modalTransitionStyle
-
-### 지원 되는 플랫폼
+## 지원 되는 플랫폼
 
 *   아마존 화재 운영 체제
 *   안 드 로이드
 *   블랙베리 10
 *   Firefox 운영 체제
 *   iOS
-*   윈도우 8과 8.1
+*   Tizen
 *   Windows Phone 7과 8
+*   윈도우 8
+
+## 메서드
+
+*   navigator.geolocation.getCurrentPosition
+*   navigator.geolocation.watchPosition
+*   navigator.geolocation.clearWatch
+
+## (읽기 전용) 개체
+
+*   Position
+*   PositionError
+*   Coordinates
+
+## navigator.geolocation.getCurrentPosition
+
+디바이스의 현재 위치를 반환 합니다는 `geolocationSuccess` 로 콜백은 `Position` 매개 변수로 개체. 오류가 발생 하는 경우는 `geolocationError` 콜백 전달 되는 `PositionError` 개체.
+
+    navigator.geolocation.getCurrentPosition (geolocationSuccess, [geolocationError] [geolocationOptions]);
+    
+
+### 매개 변수
+
+*   **geolocationSuccess**: 현재의 위치를 전달 되는 콜백.
+
+*   **geolocationError**: *(선택 사항)* 오류가 발생 하면 실행 되는 콜백.
+
+*   **geolocationOptions**: *(선택 사항)* 위치 옵션.
 
 ### 예를 들어
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    var ref2 = window.open(encodeURI('http://ja.m.wikipedia.org/wiki/ハングル'), '_blank', 'location=yes');
+    onSuccess 콜백 / /이 메서드 허용 위치 개체를 포함 하는 / 현재 GPS 좌표 / / / var onSuccess function(position) = {경고 (' 위도: ' + position.coords.latitude + '\n' + ' 경도: ' + position.coords.longitude + '\n' + ' 고도: ' + position.coords.altitude + '\n' + ' 정확도: ' + position.coords.accuracy + '\n' + ' 고도 정확도: ' + position.coords.altitudeAccuracy + '\n' + ' 제목: ' + position.coords.heading + '\n' + ' 속도: ' + position.coords.speed + '\n' + ' 타임 스탬프: ' + position.timestamp + '\n');};
+    
+    onError 콜백 수신 PositionError 개체 / / onError(error) 기능 {경고 (' 코드: ' error.code + '\n' + ' 메시지: ' error.message + '\n');}
+    
+    navigator.geolocation.getCurrentPosition (onSuccess, onError);
     
 
-### 파이어 폭스 OS 단점
+## navigator.geolocation.watchPosition
 
-플러그인 어떤 디자인을 적용 하지 않는 경우 열 일부 CSS의 규칙을 추가할 필요가 있다 `target='_blank'` . 이 같이 규칙
+위치에 변화를 탐지할 때 소자의 현재 위치를 반환 합니다. 새 위치를 검색 하는 장치는 `geolocationSuccess` 콜백 실행 한 `Position` 매개 변수로 개체. 오류가 발생 하는 경우는 `geolocationError` 콜백 실행 한 `PositionError` 매개 변수로 개체.
 
-     css
-    .inAppBrowserWrap {
-      background-color: rgba(0,0,0,0.75);
-      color: rgba(235,235,235,1.0);
-    }
-    .inAppBrowserWrap menu {
-      overflow: auto;
-      list-style-type: none;
-      padding-left: 0;
-    }
-    .inAppBrowserWrap menu li {
-      font-size: 25px;
-      height: 25px;
-      float: left;
-      margin: 0 10px;
-      padding: 3px 10px;
-      text-decoration: none;
-      color: #ccc;
-      display: block;
-      background: rgba(30,30,30,0.50);
-    }
-    .inAppBrowserWrap menu li.disabled {
-        color: #777;
-    }
+    var watchId = navigator.geolocation.watchPosition (geolocationSuccess, [geolocationError] [geolocationOptions]);
     
 
-## InAppBrowser
+### 매개 변수
 
-호출에서 반환 하는 개체`window.open`.
+*   **geolocationSuccess**: 현재의 위치를 전달 되는 콜백.
 
-### 메서드
+*   **geolocationError**: (선택 사항) 오류가 발생 하면 실행 되는 콜백.
 
-*   addEventListener
-*   removeEventListener
-*   close
-*   show
-*   executeScript
-*   insertCSS
+*   **geolocationOptions**: (선택 사항)는 지리적 위치 옵션.
 
-## addEventListener
+### 반환
 
-> 이벤트에 대 한 수신기를 추가 합니다`InAppBrowser`.
+*   **문자열**: 시계 위치 간격을 참조 하는 시계 id를 반환 합니다. 시계 id와 함께 사용 해야 합니다 `navigator.geolocation.clearWatch` 위치 변화에 대 한 보고 중지.
 
-    ref.addEventListener(eventname, callback);
+### 예를 들어
+
+    onSuccess 콜백 /이 메서드를 포함 하는 '위치' 개체를 허용 하는 / / 현재 GPS 좌표 / / / onSuccess(position) 기능 {var 요소 = document.getElementById('geolocation');
+        element.innerHTML = ' 위도: ' + position.coords.latitude + ' < br / >' + ' 경도: ' + position.coords.longitude + ' < br / >' + ' < hr / >' + element.innerHTML;
+    } / / onError 콜백 수신 PositionError 개체 / / onError(error) 기능 {경고 (' 코드: ' error.code + '\n' + ' 메시지: ' error.message + '\n');}
+    
+    옵션: 없음 업데이트 30 초 마다 수신 되 면 오류가 throw 합니다.
+    var watchID = navigator.geolocation.watchPosition (onSuccess onError, {타임 아웃: 30000});
     
 
-*   **심판**:에 대 한 참조는 `InAppBrowser` 창 *(InAppBrowser)*
+## geolocationOptions
 
-*   **eventname**: *(문자열)를* 수신 하도록 이벤트
-    
-    *   **loadstart**: 이벤트 발생 때는 `InAppBrowser` URL 로드를 시작 합니다.
-    *   **loadstop**: 이벤트가 발생 시기는 `InAppBrowser` URL 로드 완료.
-    *   **loaderror**: 이벤트 발생 때는 `InAppBrowser` URL을 로드할 때 오류가 발생 합니다.
-    *   **종료**: 이벤트가 발생 시기는 `InAppBrowser` 창이 닫힙니다.
+선택적 매개 변수는 위치 정보 검색을 사용자 지정 하려면`Position`.
 
-*   **콜백**: 이벤트가 발생 될 때 실행 되는 함수. 함수는 전달 된 `InAppBrowserEvent` 개체를 매개 변수로 합니다.
-
-### InAppBrowserEvent 속성
-
-*   **유형**: eventname, 중 `loadstart` , `loadstop` , `loaderror` , 또는 `exit` . *(문자열)*
-
-*   **url**: URL 로드 된. *(문자열)*
-
-*   **코드**: 오류 코드의 경우에만 `loaderror` . *(수)*
-
-*   **메시지**: 오류 메시지의 경우에만 `loaderror` . *(문자열)*
-
-### 지원 되는 플랫폼
-
-*   아마존 화재 운영 체제
-*   안 드 로이드
-*   iOS
-*   윈도우 8과 8.1
-*   Windows Phone 7과 8
-
-### 빠른 예제
-
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.addEventListener('loadstart', function(event) { alert(event.url); });
+    {maximumAge: 3000, 타임 아웃: 5000, enableHighAccuracy: true};
     
 
-## removeEventListener
+### 옵션
 
-> 이벤트에 대 한 수신기를 제거 합니다`InAppBrowser`.
+*   **enableHighAccuracy**: 힌트는 응용 프로그램에 필요한 최상의 결과 제공 합니다. 기본적으로 장치를 검색 하려고 한 `Position` 네트워크 기반 방법을 사용 하 여. 이 속성을 설정 `true` 위성 위치 등 보다 정확한 방법을 사용 하 여 프레임 워크. *(부울)*
 
-    ref.removeEventListener(eventname, callback);
+*   **시간 제한**: 최대 시간의 길이 (밀리초) 호출에서 전달할 수 있는 `navigator.geolocation.getCurrentPosition` 또는 `geolocation.watchPosition` 해당까지 `geolocationSuccess` 콜백 실행. 경우는 `geolocationSuccess` 콜백이이 시간 내에서 호출 되지 않습니다는 `geolocationError` 콜백 전달 되는 `PositionError.TIMEOUT` 오류 코드. (함께 사용 하는 경우 `geolocation.watchPosition` , `geolocationError` 콜백 간격에서 호출 될 수 있는 모든 `timeout` 밀리초!) *(수)*
+
+*   **maximumAge**: 밀리초 단위로 지정 된 시간 보다 더 큰 되는 캐시 위치를 수락 합니다. *(수)*
+
+### 안 드 로이드 단점
+
+하지 않는 한 안 드 로이드 2.x 에뮬레이터 위치 결과 반환 하지 않습니다는 `enableHighAccuracy` 옵션을 설정`true`.
+
+## navigator.geolocation.clearWatch
+
+참조 디바이스의 위치 변경에 대 한 보고 중지는 `watchID` 매개 변수.
+
+    navigator.geolocation.clearWatch(watchID);
     
 
-*   **심판**:에 대 한 참조는 `InAppBrowser` 창. *(InAppBrowser)*
+### 매개 변수
 
-*   **eventname**: 이벤트 수신 대기를 중지 합니다. *(문자열)*
+*   **watchID**: id는 `watchPosition` 간격을 취소 합니다. (문자열)
+
+### 예를 들어
+
+    옵션: 대 한 위치에서 변경 하 고 가장 많이 사용 / / 정확한 위치 수집 방법을 사용할 수 있습니다.
+    var watchID = navigator.geolocation.watchPosition (onSuccess onError, {enableHighAccuracy: true});
     
-    *   **loadstart**: 이벤트 발생 때는 `InAppBrowser` URL 로드를 시작 합니다.
-    *   **loadstop**: 이벤트가 발생 시기는 `InAppBrowser` URL 로드 완료.
-    *   **loaderror**: 이벤트 발생 때는 `InAppBrowser` URL 로드 오류가 발생 합니다.
-    *   **종료**: 이벤트가 발생 시기는 `InAppBrowser` 창이 닫힙니다.
-
-*   **콜백**: 이벤트가 발생 하면 실행할 함수. 함수는 전달 된 `InAppBrowserEvent` 개체.
-
-### 지원 되는 플랫폼
-
-*   아마존 화재 운영 체제
-*   안 드 로이드
-*   iOS
-*   윈도우 8과 8.1
-*   Windows Phone 7과 8
-
-### 빠른 예제
-
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    var myCallback = function(event) { alert(event.url); }
-    ref.addEventListener('loadstart', myCallback);
-    ref.removeEventListener('loadstart', myCallback);
+    ....later에...
+    
+    navigator.geolocation.clearWatch(watchID);
     
 
-## close
+## Position
 
-> 종료는 `InAppBrowser` 창.
+포함 `Position` 좌표 및 타임 스탬프, geolocation API에 의해 만들어진.
 
-    ref.close();
-    
+### 속성
 
-*   **심판**:에 대 한 참조는 `InAppBrowser` 창 *(InAppBrowser)*
+*   **coords**: 지리적 좌표 집합. *(좌표)*
 
-### 지원 되는 플랫폼
+*   **타임 스탬프**: 생성 타임 스탬프에 대 한 `coords` . *(날짜)*
 
-*   아마존 화재 운영 체제
-*   안 드 로이드
-*   Firefox 운영 체제
-*   iOS
-*   윈도우 8과 8.1
-*   Windows Phone 7과 8
+## Coordinates
 
-### 빠른 예제
+A `Coordinates` 개체에 연결 되는 `Position` 콜백 함수는 현재 위치에 대 한 요청에 사용할 수 있는 개체. 그것은 위치의 지리적 좌표를 설명 하는 속성 집합이 포함 되어 있습니다.
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.close();
-    
+### 속성
 
-## show
+*   **위도**: 소수점도 위도. *(수)*
 
-> 숨겨진 열은 한 InAppBrowser 창을 표시 합니다. 전화는 InAppBrowser가 이미 보이는 경우는 효과가 없습니다.
+*   **경도**: 경도 10 진수 각도. *(수)*
 
-    ref.show();
-    
+*   **고도**: 높이의 타원 면 미터에 위치. *(수)*
 
-*   **ref**: InAppBrowser 창 (참조`InAppBrowser`)
+*   **정확도**: 정확도 레벨 미터에 위도 및 경도 좌표. *(수)*
 
-### 지원 되는 플랫폼
+*   **altitudeAccuracy**: 미터에 고도 좌표의 정확도 수준. *(수)*
 
-*   아마존 화재 운영 체제
-*   안 드 로이드
-*   iOS
-*   윈도우 8과 8.1
+*   **제목**: 여행, 진 북을 기준으로 시계 방향으로 세도에 지정 된 방향으로. *(수)*
 
-### 빠른 예제
+*   **속도**: 초당 미터에 지정 된 디바이스의 현재 땅 속도. *(수)*
 
-    var ref = window.open('http://apache.org', '_blank', 'hidden=yes');
-    // some time later...
-    ref.show();
-    
+### 아마존 화재 OS 단점
 
-## executeScript
+**altitudeAccuracy**: 반환 안 드 로이드 장치에 의해 지원 되지 않습니다`null`.
 
-> 에 자바 스크립트 코드를 삽입는 `InAppBrowser` 창
+### 안 드 로이드 단점
 
-    ref.executeScript(details, callback);
-    
+**altitudeAccuracy**: 반환 안 드 로이드 장치에 의해 지원 되지 않습니다`null`.
 
-*   **심판**:에 대 한 참조는 `InAppBrowser` 창. *(InAppBrowser)*
+## PositionError
 
-*   **injectDetails**: 스크립트 실행의 세부 사항 중 하나를 지정 하는 `file` 또는 `code` 키. *(개체)*
-    
-    *   **파일**: 삽입 하는 스크립트의 URL.
-    *   **코드**: 스크립트 텍스트를 삽입 합니다.
+`PositionError`개체에 전달 되는 `geolocationError` 콜백 함수 navigator.geolocation 오류가 발생 한 경우.
 
-*   **콜백**: 자바 스크립트 코드를 주입 후 실행 기능.
-    
-    *   삽입 된 스크립트 유형의 경우 `code` , 스크립트의 반환 값은 단일 매개 변수는 콜백 실행에 싸여 있는 `Array` . 여러 줄 스크립트에 대 한 마지막 문 또는 평가 마지막 식의 반환 값입니다.
+### 속성
 
-### 지원 되는 플랫폼
+*   **코드**: 미리 정의 된 오류 코드 중 하나가 아래에 나열 된.
 
-*   아마존 화재 운영 체제
-*   안 드 로이드
-*   iOS
-*   윈도우 8과 8.1
+*   **메시지**: 발생 한 오류 세부 정보를 설명 하는 오류 메시지.
 
-### 빠른 예제
+### 상수
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.addEventListener('loadstop', function() {
-        ref.executeScript({file: "myscript.js"});
-    });
-    
-
-## insertCSS
-
-> 주사로 CSS는 `InAppBrowser` 창.
-
-    ref.insertCSS(details, callback);
-    
-
-*   **심판**:에 대 한 참조는 `InAppBrowser` 창 *(InAppBrowser)*
-
-*   **injectDetails**: 스크립트 실행의 세부 사항 중 하나를 지정 하는 `file` 또는 `code` 키. *(개체)*
-    
-    *   **파일**: 삽입 하는 스타일 시트의 URL.
-    *   **코드**: 삽입 하는 스타일 시트의 텍스트.
-
-*   **콜백**: CSS 주입 후 실행 기능.
-
-### 지원 되는 플랫폼
-
-*   아마존 화재 운영 체제
-*   안 드 로이드
-*   iOS
-
-### 빠른 예제
-
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.addEventListener('loadstop', function() {
-        ref.insertCSS({file: "mystyles.css"});
-    });
+*   `PositionError.PERMISSION_DENIED` 
+    *   사용자가 위치 정보를 검색 애플 리 케이 션을 허용 하지 않는 경우 반환 됩니다. 이 플랫폼에 따라 달라 집니다.
+*   `PositionError.POSITION_UNAVAILABLE` 
+    *   장치 위치를 검색할 수 없을 때 반환 합니다. 일반적으로,이 장치는 네트워크에 연결 되어 있지 않은 또는 위성 수정 프로그램을 얻을 수 없습니다 의미 합니다.
+*   `PositionError.TIMEOUT` 
+    *   장치에 지정 된 시간 내에서 위치를 검색할 수 없는 경우 반환 되는 `timeout` 에 포함 된 `geolocationOptions` . 함께 사용 될 때 `navigator.geolocation.watchPosition` ,이 오류를 반복적으로 전달 될 수는 `geolocationError` 콜백 매 `timeout` 밀리초.

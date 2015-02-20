@@ -20,127 +20,86 @@
 -->
 # Release Notes
 
-### 0.2.2 (Sept 25, 2013)
+### 0.3.0 (Sept 5, 2013)
+* Added support for windows 8 (Adds required permission)
+
+### 0.3.2 (Sept 25, 2013)
 * CB-4889 bumping&resetting version
-* CB-4788: Modified the onJsPrompt to warn against Cordova calls
-* [windows8] commandProxy was moved
-* CB-4788: Modified the onJsPrompt to warn against Cordova calls
-* [windows8] commandProxy was moved
-* CB-4889 renaming core references
-* CB-4889 renaming org.apache.cordova.core.inappbrowser to org.apache.cordova.inappbrowser
-* CB-4864, CB-4865: Minor improvements to InAppBrowser
-* Rename CHANGELOG.md -> RELEASENOTES.md
-* [CB-4792] Added keepCallback to the show function.
-* [CB-4752] Incremented plugin version on dev branch.
+* [BlackBerry10] removed uneeded permission tags in plugin.xml
+* CB-4889 renaming org.apache.cordova.core.geolocation to org.apache.cordova.geolocation
 
-### 0.2.3 (Oct 9, 2013)
+### 0.3.3 (Oct 28, 2013)
+* CB-5128: add repo + issue tag to plugin.xml for geolocation plugin
 * [CB-4915] Incremented plugin version on dev branch.
-* [CB-4926] Fixes inappbrowser plugin loading for windows8
 
-### 0.2.4 (Oct 28, 2013)
-* CB-5128: added repo + issue tag to plugin.xml for inappbrowser plugin
-* CB-4995 Fix crash when WebView is quickly opened then closed.
-* CB-4930 - iOS - InAppBrowser should take into account the status bar
-* [CB-5010] Incremented plugin version on dev branch.
-* [CB-5010] Updated version and RELEASENOTES.md for release 0.2.3
-* CB-4858 - Run IAB methods on the UI thread.
-* CB-4858 Convert relative URLs to absolute URLs in JS
-* CB-3747 Fix back button having different dismiss logic from the close button.
-* CB-5021 Expose closeDialog() as a public function and make it safe to call multiple times.
-* CB-5021 Make it safe to call close() multiple times
+### 0.3.4 (Dec 4, 2013)
+* Append proxy to platform definition in plugin.xml
+* Append windows 8 Geolocation proxy
+* Code clean-up for android src.
+* Updated amazon-fireos platform + reverting some of the fixes in android code.
+* Added amazon-fireos platform + some of the fixes in android code.
+* CB-5334 [BlackBerry10] Use command proxy
+* call FxOS's getCurrentProxy added
+* pass by only coords
+* proper implementation for firefoxos
 
-### 0.2.5 (Dec 4, 2013)
-* Remove merge conflict tag
-* [CB-4724] fixed UriFormatException
-* add ubuntu platform
-* CB-3420 WP feature hidden=yes implemented
-* Added amazon-fireos platform. Change to use amazon-fireos as the platform if user agent string contains 'cordova-amazon-fireos'
+### 0.3.5 (Jan 02, 2014)
+* CB-5658 Add doc/index.md for Geolocation plugin
+* windows8: adds missing reference to PositionError (w/o it the app crashes)
+* Removing incorrectly added closing comments for wp7 platform in plugin.xml
 
-### 0.3.0 (Jan 02, 2014)
-* CB-5592 Android: Add MIME type to Intent when opening file:/// URLs
-* CB-5594 iOS: Add disallowoverscroll option.
-* CB-5658 Add doc/index.md for InAppBrowser plugin
-* CB-5595 Add toolbarposition=top option.
-* Apply CB-5193 to InAppBrowser (Fix DB quota exception)
-* CB-5593 iOS: Make InAppBrowser localizable
-* CB-5591 Change window.escape to encodeURIComponent
+### 0.3.6 (Feb 05, 2014)
+* add ubuntu platform support
+* CB-5326 adding FFOS permission and updating supported platforms
+* CB-5729 [BlackBerry10] Update GeolocationProxy to return collapsed object
 
-### 0.3.1 (Feb 05, 2014)
-* CB-5756: Android: Use WebView.evaluateJavascript for script injection on Android 4.4+
-* Didn't test on ICS or lower, getDrawable isn't supported until Jellybean
-* add ubuntu platform
-* Adding drawables to the inAppBrowser.  This doesn't look quite right, but it's a HUGE improvement over the previous settings
-* CB-5756: Android: Use WebView.evaluateJavascript for script injection on Android 4.4+
-* Remove alive from InAppBrowser.js since it didn't catch the case where the browser is closed by the user.
-* CB-5733 Fix IAB.close() not working if called before show() animation is done
-
-### 0.3.2 (Feb 26, 2014)
-* Validate that callbackId is correctly formed
-* CB-6035 Move js-module so it is not loaded on unsupported platforms
-* Removed some iOS6 Deprecations
-
-### 0.3.3 (Mar 5, 2014)
-* CB-5534 Fix video/audio does not stop playing when browser is closed
-* CB-6172 Fix broken install on case-sensitive file-systems
-
-
-### 0.4.0 (Apr 17, 2014)
-* CB-6360: [ios] Fix for crash on iOS < 6.0 (closes #37)
-* CB-3324: [WP8] Add support for back-button inappbrowser [WP8] if there is no history -> InAppBrowser is closed
-* [WP] await async calls, resolve warnings
-* [WP] Make InAppBrowser work with embedded files, using system behavior
-* CB-6402: [WP8] pass empty string instead of null for [optional] windowFeatures string
+### 0.3.7 (Apr 17, 2014)
 * CB-6422: [windows8] use cordova/exec/proxy
-* CB-6389 CB-3617: Add clearcache and clearsessioncache options to iOS (like Android)
-* Doc update: event name and example param (closes #31)
-* CB-6253: [WP] Add Network Capability to WMAppManifest.xml
 * CB-6212: [iOS] fix warnings compiled under arm64 64-bit
-* CB-6218: Update docs for BB10
+* CB-5977: [android] Removing the Android Geolocation Code.  Mission Accomplished.
 * CB-6460: Update license headers
+* Add NOTICE file
 
-### 0.5.0 (Jun 05, 2014)
-* CB-6127 Spanish and rench Translations added. Github close #23
-* Clean up whitespace (mainly due to no newline at eof warning)
-* Adding permission info
-* CB-6806 Add license
+### 0.3.8 (Jun 05, 2014)
+* CB-6127 Spanish and French Translations added. Github close #14
+* CB-6804 Add license
+* CB-5416 - Adding support for auto-managing permissions
 * CB-6491 add CONTRIBUTING.md
-* Add necessary capability so the plugin works on its own
-* CB-6474 InAppBrowser. Add data urls support to WP8
-* CB-6482 InAppBrowser calls incorrect callback on WP8
-* Fixed use of iOS 6 deprecated methods
-* CB-6360 - improvement: feature detection instead of iOS version detection
-* CB-5649 - InAppBrowser overrides App's orientation
-* refactoring fixed
-* CB-6396 [Firefox OS] Adding basic support
+* pass by only coords
+* proper implementation for firefoxos
+* call FxOS's getCurrentProxy added
 
-### 0.5.1 (Aug 06, 2014)
-* ubuntu: support qt 5.2
-* **FFOS** update InAppBrowserProxy.js
-* **FFOS** app needs to be privileged
+### 0.3.9 (Aug 06, 2014)
+* **FFOS** update GeolocationProxy.js
+* CB-7187 ios: Add explicit dependency on CoreLocation.framework
+* CB-7187 Delete unused #import of CDVShared.h
 * CB-6127 Updated translations for docs
-* CB-6769 ios: Fix statusbar color reset wasn't working on iOS7+
+* ios: Changed distanceFilter from none to 5 meters, prevents it from spamming the callback even though nothing changed.
 
-### 0.5.2 (Sep 17, 2014)
-* CB-7471 cordova-plugin-inappbrowser documentation translation: cordova-plugin-inappbrowser
-* CB-7490 Fixes InAppBrowser manual tests crash on windows platform
-* CB-7249 cordova-plugin-inappbrowser documentation translation: cordova-plugin-inappbrowser
-* CB-7424 Wrong docs: anchor tags are not supported by the InAppBrowser
-* CB-7133 clarify that anchor1 doesn't exist
-* CB-7133 more fixup of tests on Android
-* CB-7133 fix up the tests for Android
-* Add just a bit more logging
-* CB-7133 port inappbrowser to plugin-test-framework
-* phonegap events supported for \_blank target
-* inappbrowser \_blank target position is fixed
-* amazon-fireos related changes.
 
-### 0.5.3 (Oct 03, 2014)
-* Windows implementation fixes and improvements
-* zIndex fixed
-* renamed InAppBrowser back to inappbrowser for case sensitive operating systems
-* Update french translation
-* Update doc to add Windows 8
-* Update windows proxy to be both compatible with windows 8 and 8.1
-* Rename windows81 by windows8 in src directory
-* Append Windows 8.1 platform configuration in plugin.xml
-* Append Windows 8.1 proxy using x-ms-webview
+### 0.3.10 (Sep 17, 2014)
+* CB-7556 iOS: Clearing all Watches does not stop Location Services
+* CB-7158 Fix geolocation for ios 8
+* Revert CB-6911 partially (keeping Info.plist key installation for iOS 8)
+* CB-6911 Geolocation fails in iOS 8
+* CB-5114 Windows 8.1 - Use a new proxy as old geolocation methods is deprecated
+* CB-5114 Append Windows 8.1 into plugin.xml + Optimize Windows 8 Geolocation proxy
+* Renamed test dir, added nested plugin.xml
+* added documentation for manual tests
+* CB-7146 Added manual tests
+* Removed js-module for tests from plugin.xml
+* Changing cdvtest format to use module exports
+* register tests using new style
+* Convert tests to new style
+* Removed amazon-fireos code for geolocation.
+* CB-7571 Bump version of nested plugin to match parent plugin
+
+### 0.3.11 (Dec 02, 2014)
+* Do not stop updating location when the error is `kCLErrorLocationUnknown`
+* CB-8094 Pended auto tests for **Windows** Store since they require user interaction
+* CB-8085 Fix geolocation plugin on **Windows**
+* CB-7977 Mention `deviceready` in plugin docs
+* CB-7700 cordova-plugin-geolocation documentation translation: cordova-plugin-geolocation
+
+### 0.3.12 (Feb 04, 2015)
+* CB-8351 ios: Use argumentForIndex rather than NSArray extension

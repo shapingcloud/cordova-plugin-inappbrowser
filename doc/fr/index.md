@@ -17,314 +17,190 @@
     under the License.
 -->
 
-# org.apache.cordova.inappbrowser
+# org.apache.cordova.geolocation
 
-Ce plugin vous offre une vue de navigateur web qui s'affiche lors de l'appel`window.open()`.
+Ce plugin fournit des informations sur l'emplacement de l'appareil, tels que la latitude et la longitude. Les sources habituelles d'information incluent le Système de Positionnement Global (GPS) et la position déduite de signaux des réseaux tels que l'adresse IP, RFID, les adresses MAC WiFi et Bluetooth et les IDs cellulaires GSM/CDMA. Il n'y a cependant aucune garantie que cette API renvoie la position réelle de l'appareil.
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    
+Cette API est basée sur la [Spécification de l'API Geolocation du W3C][1] et s'exécute uniquement sur les appareils qui n'en proposent pas déjà une implémentation.
 
-**Remarque**: InAppBrowser la fenêtre se comporte comme un navigateur web standard et ne peut pas accéder aux APIs Cordova.
+ [1]: http://dev.w3.org/geo/api/spec-source.html
+
+**Avertissement**: collecte et utilisation des données de géolocalisation soulève des questions importantes de la vie privée. La politique de confidentialité de votre application devrait traiter de la manière dont l'application utilise les données de géolocalisation, si elle les partage avec d'autres parties ou non et définir le niveau de précision de celles-ci (par exemple grossier, fin, restreint au code postal, etc.). Données de géolocalisation sont généralement considéré comme sensibles car elle peut révéler la localisation de l'utilisateur et, si stocké, l'histoire de leurs voyages. Par conséquent, en plus de la politique de confidentialité de l'application, vous devez envisager fortement fournissant un avis juste-à-temps, avant que l'application accède aux données de géolocalisation (si le système d'exploitation de périphérique n'est pas faire déjà). Cette notice devrait contenir les informations susmentionnées, ainsi que permettre de recueillir l'autorisation de l'utilisateur (par exemple, en offrant les possibilités **OK** et **Non merci**). Pour plus d'informations, veuillez vous référer à la section "Guide du respect de la vie privée".
 
 ## Installation
 
-    cordova plugin add org.apache.cordova.inappbrowser
+    cordova plugin add org.apache.cordova.geolocation
     
 
-## window.open
-
-Ouvre une URL dans une nouvelle `InAppBrowser` instance, l'instance de navigateur actuelle ou dans l'Explorateur du système.
-
-    var ref = window.open(url, target, options);
-    
-
-*   **ref** : référence à la fenêtre `InAppBrowser`. *(InAppBrowser)*
-
-*   **url** : l'URL à charger *(String)*. À encoder au préalable via `encodeURI()` si celle-ci contient des caractères Unicode.
-
-*   **target** : la cible du chargement de l'URL, ce paramètre est optionnel, sa valeur par défaut est `_self`. *(String)*
-    
-    *   `_self` : dirige le chargement vers la WebView Cordova si l'URL figure dans la liste blanche, sinon dans une fenêtre `InAppBrowser`.
-    *   `_blank` : dirige le chargement vers une fenêtre `InAppBrowser`.
-    *   `_system` : dirige le chargement vers le navigateur Web du système.
-
-*   **options** : permet de personnaliser la fenêtre `InAppBrowser`. Paramètre facultatif dont la valeur par défaut est `location=yes`. *(String)*
-    
-    La chaîne `options` ne doit contenir aucun caractère vide, chaque paire nom/valeur représentant une fonctionnalité doit être séparée de la précédente par une virgule. Les noms de fonctionnalités sont sensibles à la casse. Toutes les plates-formes prennent en charge la valeur ci-dessous :
-    
-    *   **location** : régler à `yes` ou `no` afin d'afficher ou masquer la barre d'adresse de la fenêtre `InAppBrowser`.
-    
-    Android uniquement :
-    
-    *   **closebuttoncaption**: affectez une chaîne à utiliser comme la **fait** légende du bouton.
-    *   **caché**: la valeur `yes` pour créer le navigateur et charger la page, mais ne pas le montrer. L'événement loadstop est déclenché lorsque le chargement est terminé. Omettre ou la valeur `no` (par défaut) pour que le navigateur ouvrir et charger normalement.
-    *   **ClearCache**: la valeur `yes` pour que le navigateur du cache de cookie effacé, avant l'ouverture de la nouvelle fenêtre
-    *   **clearsessioncache**: la valeur `yes` pour avoir le cache de cookie de session autorisé avant l'ouverture de la nouvelle fenêtre
-    
-    iOS uniquement :
-    
-    *   **closebuttoncaption**: affectez une chaîne à utiliser comme la **fait** légende du bouton. Notez que vous devrez localiser cette valeur vous-même.
-    *   **disallowoverscroll**: la valeur `yes` ou `no` (valeur par défaut est `no` ). Active/désactive la propriété UIWebViewBounce.
-    *   **caché**: la valeur `yes` pour créer le navigateur et charger la page, mais ne pas le montrer. L'événement loadstop est déclenché lorsque le chargement est terminé. Omettre ou la valeur `no` (par défaut) pour que le navigateur ouvrir et charger normalement.
-    *   **ClearCache**: la valeur `yes` pour que le navigateur du cache de cookie effacé, avant l'ouverture de la nouvelle fenêtre
-    *   **clearsessioncache**: la valeur `yes` pour avoir le cache de cookie de session autorisé avant l'ouverture de la nouvelle fenêtre
-    *   **barre d'outils**: la valeur `yes` ou `no` pour activer la barre d'outils ou désactiver pour le InAppBrowser (par défaut,`yes`)
-    *   **enableViewportScale**: la valeur `yes` ou `no` pour empêcher la fenêtre de mise à l'échelle par une balise meta (par défaut,`no`).
-    *   **mediaPlaybackRequiresUserAction**: la valeur `yes` ou `no` pour empêcher le HTML5 audio ou vidéo de la lecture automatique (par défaut,`no`).
-    *   **allowInlineMediaPlayback**: la valeur `yes` ou `no` pour permettre la lecture du média en ligne HTML5, affichage dans la fenêtre du navigateur plutôt que d'une interface de lecture spécifique au périphérique. L'HTML `video` élément doit également inclure la `webkit-playsinline` attribut (par défaut,`no`)
-    *   **keyboardDisplayRequiresUserAction**: la valeur `yes` ou `no` pour ouvrir le clavier lorsque les éléments reçoivent le focus par l'intermédiaire de JavaScript `focus()` appel (par défaut,`yes`).
-    *   **suppressesIncrementalRendering**: la valeur `yes` ou `no` d'attendre que toutes les nouveautés de vue sont reçue avant d'être restitué (par défaut,`no`).
-    *   **presentationstyle**: la valeur `pagesheet` , `formsheet` ou `fullscreen` pour définir le [style de présentation][1] (par défaut,`fullscreen`).
-    *   **transitionstyle**: la valeur `fliphorizontal` , `crossdissolve` ou `coververtical` pour définir le [style de transition][2] (par défaut,`coververtical`).
-    *   **toolbarposition**: la valeur `top` ou `bottom` (valeur par défaut est `bottom` ). Causes de la barre d'outils être en haut ou en bas de la fenêtre.
-    
-    Windows uniquement :
-    
-    *   **caché**: la valeur `yes` pour créer le navigateur et charger la page, mais ne pas le montrer. L'événement loadstop est déclenché lorsque le chargement est terminé. Omettre ou la valeur `no` (par défaut) pour que le navigateur ouvrir et charger normalement.
-
- [1]: http://developer.apple.com/library/ios/documentation/UIKit/Reference/UIViewController_Class/Reference/Reference.html#//apple_ref/occ/instp/UIViewController/modalPresentationStyle
- [2]: http://developer.apple.com/library/ios/#documentation/UIKit/Reference/UIViewController_Class/Reference/Reference.html#//apple_ref/occ/instp/UIViewController/modalTransitionStyle
-
-### Plates-formes prises en charge
+## Plates-formes prises en charge
 
 *   Amazon Fire OS
 *   Android
 *   BlackBerry 10
 *   Firefox OS
 *   iOS
-*   Windows 8 et 8.1
+*   Paciarelli
 *   Windows Phone 7 et 8
+*   Windows 8
+
+## Méthodes
+
+*   navigator.geolocation.getCurrentPosition
+*   navigator.geolocation.watchPosition
+*   navigator.geolocation.clearWatch
+
+## Objets (lecture seule)
+
+*   Position
+*   PositionError
+*   Coordonnées
+
+## navigator.geolocation.getCurrentPosition
+
+Retourne la position actuelle de l'appareil à la `geolocationSuccess` rappel avec un `Position` objet comme paramètre. Si une erreur se produit, le `geolocationError` rappel est passé un `PositionError` objet.
+
+    navigator.geolocation.getCurrentPosition (geolocationSuccess, [geolocationError], [geolocationOptions]) ;
+    
+
+### Paramètres
+
+*   **geolocationSuccess** : la fonction callback à laquelle est transmise la position actuelle.
+
+*   **geolocationError** : *(facultative)* la fonction callback s'exécutant si une erreur survient.
+
+*   **geolocationOptions** : *(facultatives)* des préférences de géolocalisation.
 
 ### Exemple
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    var ref2 = window.open(encodeURI('http://ja.m.wikipedia.org/wiki/ハングル'), '_blank', 'location=yes');
+    onSuccess rappel / / cette méthode accepte un objet de Position, qui contient le / / coordonnées GPS actuel / / var onSuccess = function(position) {alert ('Latitude: ' + position.coords.latitude + « \n » + ' Longitude: ' + position.coords.longitude + « \n » + ' Altitude: ' + position.coords.altitude + « \n » + ' précision: ' + position.coords.accuracy + « \n » + ' Altitude précision: ' + position.coords.altitudeAccuracy + « \n » + ' rubrique: ' + position.coords.heading + « \n » + ' vitesse: ' + position.coords.speed + « \n » + ' Timestamp: ' + position.timestamp + « \n »);} ;
+    
+    onError rappel reçoit un objet PositionError / / function onError(error) {alert ('code: "+ error.code + « \n » + ' message: ' + error.message + « \n »);}
+    
+    navigator.geolocation.getCurrentPosition (onSuccess, onError) ;
     
 
-### Firefox OS Quirks
+## navigator.geolocation.watchPosition
 
-Comme plugin n'est pas appliquer n'importe quelle conception il est nécessaire d'ajouter quelques règles CSS si ouvert avec `target='_blank'` . Les règles pourraient ressembler à ces
+Retourne la position actuelle de l'appareil lorsqu'un changement de position est détecté. Lorsque l'appareil récupère un nouvel emplacement, le `geolocationSuccess` rappel s'exécute avec un `Position` objet comme paramètre. Si une erreur se produit, le `geolocationError` rappel s'exécute avec un `PositionError` objet comme paramètre.
 
-     css
-    .inAppBrowserWrap {
-      background-color: rgba(0,0,0,0.75);
-      color: rgba(235,235,235,1.0);
-    }
-    .inAppBrowserWrap menu {
-      overflow: auto;
-      list-style-type: none;
-      padding-left: 0;
-    }
-    .inAppBrowserWrap menu li {
-      font-size: 25px;
-      height: 25px;
-      float: left;
-      margin: 0 10px;
-      padding: 3px 10px;
-      text-decoration: none;
-      color: #ccc;
-      display: block;
-      background: rgba(30,30,30,0.50);
-    }
-    .inAppBrowserWrap menu li.disabled {
-        color: #777;
-    }
+    var watchId = navigator.geolocation.watchPosition (geolocationSuccess, [geolocationError], [geolocationOptions]) ;
     
 
-## InAppBrowser
+### Paramètres
 
-L'objet retourné par un appel à`window.open`.
+*   **geolocationSuccess**: la fonction de rappel qui est passée de la position actuelle.
 
-### Méthodes
+*   **geolocationError** : (facultative) la fonction callback s'exécutant lorsqu'une erreur survient.
 
-*   addEventListener
-*   removeEventListener
-*   close
-*   show
-*   executeScript
-*   insertCSS
+*   **geolocationOptions** : (facultatives) options de personnalisation de la géolocalisation.
 
-## addEventListener
+### Retours
 
-> Ajoute un écouteur pour un évènement de la fenêtre `InAppBrowser`.
+*   **Chaîne**: retourne un id de montre qui fait référence à l'intervalle de position montre. L'id de la montre doit être utilisé avec `navigator.geolocation.clearWatch` d'arrêter de regarder pour les changements de position.
 
-    ref.addEventListener(eventname, callback);
+### Exemple
+
+    onSuccess rappel / / cette méthode accepte un objet « Position », qui contient / / coordonnées de GPS le courant / / function onSuccess(position) {var element = document.getElementById('geolocation') ;
+        element.innerHTML = ' Latitude: "+ position.coords.latitude + ' < br / >' + ' Longitude:" + position.coords.longitude + ' < br / >' + ' < hr / >' + element.innerHTML ;
+    } / / onError rappel reçoit un objet PositionError / / function onError(error) {alert ('code: ' + error.code + « \n » + "message: ' + error.message + « \n »);}
+    
+    Options : lever une erreur si aucune mise à jour n'est reçu toutes les 30 secondes.
+    var watchID = navigator.geolocation.watchPosition (onSuccess, onError, {timeout : 30000}) ;
     
 
-*   **ref** : référence à la fenêtre `InAppBrowser`. *(InAppBrowser)*
+## geolocationOptions
 
-*   **eventname** : l'évènement à écouter *(String)*
-    
-    *   **loadstart** : évènement déclenché lorsque le chargement d'une URL débute dans la fenêtre `InAppBrowser`.
-    *   **loadstop** : évènement déclenché lorsque la fenêtre `InAppBrowser` finit de charger une URL.
-    *   **loaderror** : évènement déclenché si la fenêtre `InAppBrowser` rencontre une erreur lors du chargement d'une URL.
-    *   **exit** : évènement déclenché lorsque la fenêtre `InAppBrowser` est fermée.
+Paramètres optionnels pour personnaliser la récupération de la géolocalisation`Position`.
 
-*   **callback** : la fonction à exécuter lorsque l'évènement se déclenche. Un objet `InAppBrowserEvent` lui est transmis comme paramètre.
-
-### Propriétés de InAppBrowserEvent
-
-*   **type** : le nom de l'évènement, soit `loadstart`, `loadstop`, `loaderror` ou `exit`. *(String)*
-
-*   **url** : l'URL ayant été chargée. *(String)*
-
-*   **code** : le code d'erreur, seulement pour `loaderror`. *(Number)*
-
-*   **message** : un message d'erreur, seulement pour `loaderror`. *(String)*
-
-### Plates-formes prises en charge
-
-*   Amazon Fire OS
-*   Android
-*   iOS
-*   Windows 8 et 8.1
-*   Windows Phone 7 et 8
-
-### Petit exemple
-
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.addEventListener('loadstart', function(event) { alert(event.url); });
+    {maximumAge : 3000, délai d'attente : 5000, enableHighAccuracy : true} ;
     
 
-## removeEventListener
+### Options
 
-> Supprime un écouteur pour un évènement de la fenêtre `InAppBrowser`.
+*   **enableHighAccuracy** : indique que l'application nécessite les meilleurs résultats possibles. Par défaut, l'appareil tente de récupérer une `Position` à l'aide de méthodes basées sur le réseau. Définir cette propriété à `true` demande à Cordova d'utiliser des méthodes plus précises, telles que la localisation par satellite. *(Boolean)*
 
-    ref.removeEventListener(eventname, callback);
+*   **délai d'attente**: la longueur maximale de temps (en millisecondes) qui peut passer de l'appel à `navigator.geolocation.getCurrentPosition` ou `geolocation.watchPosition` jusqu'à ce que le correspondant `geolocationSuccess` rappel s'exécute. Si `geolocationSuccess` n'est pas appelée dans ce délai, le code d'erreur `PositionError.TIMEOUT` est transmis à la fonction callback `geolocationError`. (Notez que, dans le cas de `geolocation.watchPosition`, la fonction callback `geolocationError` pourrait être appelée à un intervalle régulier de `timeout` millisecondes !) *(Number)*
+
+*   **maximumAge** : accepter une position mise en cache dont l'âge ne dépasse pas le délai spécifié en millisecondes. *(Number)*
+
+### Quirks Android
+
+Émulateurs Android 2.x ne pas retournent un résultat de géolocalisation, à moins que le `enableHighAccuracy` option est définie sur`true`.
+
+## navigator.geolocation.clearWatch
+
+Arrêter de regarder pour les modifications à l'emplacement de l'appareil référencé par le `watchID` paramètre.
+
+    navigator.geolocation.clearWatch(watchID) ;
     
 
-*   **ref** : référence à la fenêtre `InAppBrowser`. *(InAppBrowser)*
+### Paramètres
 
-*   **eventname** : l'évènement pour lequel arrêter l'écoute. *(String)*
+*   **watchID** : l'identifiant de l'intervalle `watchPosition` à effacer. (String)
+
+### Exemple
+
+    Options : suivi des modifications dans la position et utilise le plus / / exacte position méthode d'acquisition disponible.
+    var watchID = navigator.geolocation.watchPosition (onSuccess, onError, {enableHighAccuracy : true}) ;
     
-    *   **loadstart**: événement déclenche quand le `InAppBrowser` commence à charger une URL.
-    *   **loadstop**: événement déclenche lorsque la `InAppBrowser` finit de charger une URL.
-    *   **loaderror** : évènement déclenché si la fenêtre `InAppBrowser` rencontre une erreur lors du chargement d'une URL.
-    *   **sortie**: événement déclenche quand le `InAppBrowser` fenêtre est fermée.
-
-*   **callback** : la fonction à exécuter lorsque l'évènement se déclenche. Un objet `InAppBrowserEvent` lui est transmis comme paramètre.
-
-### Plates-formes prises en charge
-
-*   Amazon Fire OS
-*   Android
-*   iOS
-*   Windows 8 et 8.1
-*   Windows Phone 7 et 8
-
-### Petit exemple
-
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    var myCallback = function(event) { alert(event.url); }
-    ref.addEventListener('loadstart', myCallback);
-    ref.removeEventListener('loadstart', myCallback);
+    .. plus sur...
+    
+    navigator.geolocation.clearWatch(watchID) ;
     
 
-## close
+## Position
 
-> Ferme la fenêtre `InAppBrowser`.
+Contient `Position` coordonnées et timestamp, créé par l'API de géolocalisation.
 
-    Ref.Close() ;
-    
+### Propriétés
 
-*   **Réf**: référence à la `InAppBrowser` fenêtre *(InAppBrowser)*
+*   **coords** : un ensemble de coordonnées géographiques. *(Coordinates)*
 
-### Plates-formes prises en charge
+*   **timestamp** : horodatage de la création de `coords`. *(Date)*
 
-*   Amazon Fire OS
-*   Android
-*   Firefox OS
-*   iOS
-*   Windows 8 et 8.1
-*   Windows Phone 7 et 8
+## Coordonnées
 
-### Petit exemple
+A `Coordinates` objet est attaché à un `Position` objet qui n'existe pas de fonctions de rappel dans les requêtes pour la position actuelle. Il contient un ensemble de propriétés qui décrivent les coordonnées géographiques d'une position.
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.close();
-    
+### Propriétés
 
-## show
+*   **latitude** : latitude en degrés décimaux. *(Number)*
 
-> Affiche une fenêtre InAppBrowser qui a été ouverte cachée. Appeler cette méthode n'a aucun effet si la fenêtre en question est déjà visible.
+*   **longitude** : longitude en degrés décimaux. *(Number)*
 
-    Ref.Show() ;
-    
+*   **altitude** : hauteur de la position en mètres au-dessus de l'ellipsoïde. *(Number)*
 
-*   **Réf**: référence à la fenêtre () InAppBrowser`InAppBrowser`)
+*   **accuracy** : niveau de précision des valeurs de latitude et longitude, en mètres. *(Number)*
 
-### Plates-formes prises en charge
+*   **altitudeAccuracy** : niveau de précision de la valeur d'altitude, en mètres. *(Number)*
 
-*   Amazon Fire OS
-*   Android
-*   iOS
-*   Windows 8 et 8.1
+*   **heading** : direction du trajet, indiquée en degrés comptés dans le sens horaire par rapport au vrai Nord. *(Number)*
 
-### Petit exemple
+*   **speed** : vitesse au sol actuelle de l'appareil, indiquée en mètres par seconde. *(Number)*
 
-    var ref = window.open('http://apache.org', '_blank', 'hidden=yes');
-    // some time later...
-    ref.show();
-    
+### Amazon Fire OS Quirks
 
-## executeScript
+**altitudeAccuracy**: ne pas pris en charge par les appareils Android, retour`null`.
 
-> Injecte du code JavaScript dans la fenêtre `InAppBrowser`
+### Quirks Android
 
-    ref.executeScript(details, callback);
-    
+**altitudeAccuracy** : n'est pas prise en charge par les appareils Android, renvoie alors `null`.
 
-*   **Réf**: référence à la `InAppBrowser` fenêtre. *(InAppBrowser)*
+## PositionError
 
-*   **injectDetails** : détails du script à exécuter, requérant une propriété `file` ou `code`. *(Object)*
-    
-    *   **file** : URL du script à injecter.
-    *   **code** : texte du script à injecter.
+Le `PositionError` objet est passé à la `geolocationError` fonction de rappel lorsqu'une erreur se produit avec navigator.geolocation.
 
-*   **callback** : une fonction exécutée après l'injection du code JavaScript.
-    
-    *   Si le script injecté est de type `code`, un seul paramètre est transmis à la fonction callback, correspondant à la valeur de retour du script enveloppée dans un `Array`. Pour les scripts multilignes, il s'agit de la valeur renvoyée par la dernière instruction ou la dernière expression évaluée.
+### Propriétés
 
-### Plates-formes prises en charge
+*   **code**: l'un des codes d'erreur prédéfinis énumérés ci-dessous.
 
-*   Amazon Fire OS
-*   Android
-*   iOS
-*   Windows 8 et 8.1
+*   **message** : un message d'erreur détaillant l'erreur rencontrée.
 
-### Petit exemple
+### Constantes
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.addEventListener('loadstop', function() {
-        ref.executeScript({file: "myscript.js"});
-    });
-    
-
-## insertCSS
-
-> Injecte des règles CSS dans la fenêtre `InAppBrowser`.
-
-    ref.insertCSS(details, callback);
-    
-
-*   **Réf**: référence à la `InAppBrowser` fenêtre *(InAppBrowser)*
-
-*   **injectDetails**: Détails du script à exécuter, spécifiant soit un `file` ou `code` clés. *(Objet)*
-    
-    *   **file** : URL de la feuille de style à injecter.
-    *   **code** : contenu de la feuille de style à injecter.
-
-*   **callback** : une fonction exécutée après l'injection du fichier CSS.
-
-### Plates-formes prises en charge
-
-*   Amazon Fire OS
-*   Android
-*   iOS
-
-### Petit exemple
-
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.addEventListener('loadstop', function() {
-        ref.insertCSS({file: "mystyles.css"});
-    });
+*   `PositionError.PERMISSION_DENIED` 
+    *   Retourné lorsque les utilisateurs ne permettent pas l'application extraire des informations de position. Cela dépend de la plate-forme.
+*   `PositionError.POSITION_UNAVAILABLE` 
+    *   Retourné lorsque le périphérique n'est pas en mesure de récupérer une position. En général, cela signifie que l'appareil n'est pas connecté à un réseau ou ne peut pas obtenir un correctif de satellite.
+*   `PositionError.TIMEOUT` 
+    *   Retourné lorsque le périphérique n'est pas en mesure de récupérer une position dans le délai précisé par le `timeout` inclus dans `geolocationOptions` . Lorsqu'il est utilisé avec `navigator.geolocation.watchPosition` , cette erreur pourrait être transmise à plusieurs reprises à la `geolocationError` rappel chaque `timeout` millisecondes.

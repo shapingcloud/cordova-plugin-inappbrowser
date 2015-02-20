@@ -17,314 +17,180 @@
     under the License.
 -->
 
-# org.apache.cordova.inappbrowser
+# org.apache.cordova.geolocation
 
-這個外掛程式提供了一個 web 瀏覽器視圖，顯示在調用時`window.open()`.
+這個外掛程式提供了有關該設備的位置，例如緯度和經度資訊。 常見的位置資訊來源包括全球定位系統 (GPS) 和網路信號，如 IP 位址、 RFID、 WiFi 和藍牙 MAC 位址和 GSM/CDMA 儲存格 Id 從推斷出的位置。 沒有任何保證，API 返回設備的實際位置。
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    
+此 API 基於[W3C 地理定位 API 規範][1]，並只執行已經不提供實現的設備上。
 
-**注**： InAppBrowser 視窗的行為像一個標準的 web 瀏覽器，並且無法訪問科爾多瓦的 Api。
+ [1]: http://dev.w3.org/geo/api/spec-source.html
+
+**警告**： 地理定位資料的收集和使用提出了重要的隱私問題。 您的應用程式的隱私權原則應該討論這款應用程式如何使用地理定位資料，資料是否共用它的任何其他締約方和的資料 （例如，粗、 細，ZIP 代碼級別，等等） 的精度水準。 地理定位資料一般認為是敏感，因為它能揭示使用者的下落以及如果存儲，他們的旅行的歷史。 因此，除了應用程式的隱私權原則，您應強烈考慮之前應用程式訪問地理定位資料 （如果設備作業系統不會這樣做已經) 提供在時間的通知。 該通知應提供相同的資訊上文指出的並獲取該使用者的許可權 （例如，通過為**確定**並**不感謝**提出的選擇）。 有關詳細資訊，請參閱隱私指南。
 
 ## 安裝
 
-    cordova plugin add org.apache.cordova.inappbrowser
+    cordova plugin add org.apache.cordova.geolocation
     
 
-## window.open
-
-在一個新打開一個 URL `InAppBrowser` 實例，當前的瀏覽器實例或系統瀏覽器。
-
-    var ref = window.open(url, target, options);
-    
-
-*   **ref**： 參考 `InAppBrowser` 視窗。*() InAppBrowser*
-
-*   **url**： 要載入*（字串）*的 URL。調用 `encodeURI()` 這個如果 URL 包含 Unicode 字元。
-
-*   **目標**： 目標在其中載入的 URL，可選參數，預設值為 `_self` 。*（字串）*
-    
-    *   `_self`： 打開在科爾多瓦 web 視圖如果 URL 是在白名單中，否則它在打開`InAppBrowser`.
-    *   `_blank`： 在打開`InAppBrowser`.
-    *   `_system`： 在該系統的 web 瀏覽器中打開。
-
-*   **選項**： 選項為 `InAppBrowser` 。可選，拖欠到： `location=yes` 。*（字串）*
-    
-    `options`字串必須不包含任何空白的空間，和必須用逗號分隔每個功能的名稱/值對。 功能名稱區分大小寫。 所有平臺都支援下面的值：
-    
-    *   **位置**： 設置為 `yes` 或 `no` ，打開 `InAppBrowser` 的位置欄打開或關閉。
-    
-    Android 系統只有：
-    
-    *   **closebuttoncaption**: 設置為一個字串，以用作**做**按鈕的標題。
-    *   **隱藏**： 將設置為 `yes` ，創建瀏覽器和載入頁面，但不是顯示它。 載入完成時，將觸發 loadstop 事件。 省略或設置為 `no` （預設值），有的瀏覽器打開，然後以正常方式載入。
-    *   **clearcache**： 將設置為 `yes` 有瀏覽器的 cookie 清除緩存之前打開新視窗
-    *   **clearsessioncache**： 將設置為 `yes` 有會話 cookie 緩存清除之前打開新視窗
-    
-    只有 iOS：
-    
-    *   **closebuttoncaption**: 設置為一個字串，以用作**做**按鈕的標題。請注意您需要對此值進行當地語系化你自己。
-    *   **disallowoverscroll**： 將設置為 `yes` 或 `no` （預設值是 `no` ）。打開/關閉的 UIWebViewBounce 屬性。
-    *   **隱藏**： 將設置為 `yes` ，創建瀏覽器和載入頁面，但不是顯示它。 載入完成時，將觸發 loadstop 事件。 省略或設置為 `no` （預設值），有的瀏覽器打開，然後以正常方式載入。
-    *   **clearcache**： 將設置為 `yes` 有瀏覽器的 cookie 清除緩存之前打開新視窗
-    *   **clearsessioncache**： 將設置為 `yes` 有會話 cookie 緩存清除之前打開新視窗
-    *   **工具列**： 設置為 `yes` 或 `no` ，為 InAppBrowser （預設為打開或關閉工具列`yes`)
-    *   **enableViewportScale**： 將設置為 `yes` 或 `no` ，防止通過 meta 標記 （預設為縮放的視區`no`).
-    *   **mediaPlaybackRequiresUserAction**： 將設置為 `yes` 或 `no` ，防止 HTML5 音訊或視頻從 autoplaying （預設為`no`).
-    *   **allowInlineMediaPlayback**： 將設置為 `yes` 或 `no` ，讓線在 HTML5 播放媒體，在瀏覽器視窗中，而不是特定于設備播放介面內顯示。 HTML 的 `video` 元素還必須包括 `webkit-playsinline` 屬性 （預設為`no`)
-    *   **keyboardDisplayRequiresUserAction**： 將設置為 `yes` 或 `no` 時，要打開鍵盤表單元素接收焦點通過 JavaScript 的 `focus()` 調用 （預設為`yes`).
-    *   **suppressesIncrementalRendering**： 將設置為 `yes` 或 `no` 等待，直到所有新查看的內容正在呈現 （預設為前收到`no`).
-    *   **presentationstyle**： 將設置為 `pagesheet` ， `formsheet` 或 `fullscreen` 來設置[演示文稿樣式][1](預設為`fullscreen`).
-    *   **transitionstyle**： 將設置為 `fliphorizontal` ， `crossdissolve` 或 `coververtical` 設置[過渡樣式][2](預設為`coververtical`).
-    *   **toolbarposition**： 將設置為 `top` 或 `bottom` （預設值是 `bottom` ）。使工具列，則在頂部或底部的視窗。
-    
-    僅限 Windows：
-    
-    *   **隱藏**： 將設置為 `yes` ，創建瀏覽器並載入頁面，但不是顯示它。 載入完成時，將觸發 loadstop 事件。 省略或被設置為 `no` （預設值），有的瀏覽器打開，以正常方式載入。
-
- [1]: http://developer.apple.com/library/ios/documentation/UIKit/Reference/UIViewController_Class/Reference/Reference.html#//apple_ref/occ/instp/UIViewController/modalPresentationStyle
- [2]: http://developer.apple.com/library/ios/#documentation/UIKit/Reference/UIViewController_Class/Reference/Reference.html#//apple_ref/occ/instp/UIViewController/modalTransitionStyle
-
-### 支援的平臺
+## 支援的平臺
 
 *   亞馬遜火 OS
 *   Android 系統
 *   黑莓 10
-*   火狐瀏覽器的作業系統
+*   火狐瀏覽器作業系統
 *   iOS
-*   Windows 8 和 8.1
+*   Tizen
 *   Windows Phone 7 和 8
+*   Windows 8
+
+## 方法
+
+*   navigator.geolocation.getCurrentPosition
+*   navigator.geolocation.watchPosition
+*   navigator.geolocation.clearWatch
+
+## 物件 （唯讀）
+
+*   Position
+*   PositionError
+*   Coordinates
+
+## navigator.geolocation.getCurrentPosition
+
+返回設備的當前位置到 `geolocationSuccess` 回檔與 `Position` 物件作為參數。 如果有錯誤， `geolocationError` 回檔通過 `PositionError` 物件。
+
+    navigator.geolocation.getCurrentPosition （geolocationSuccess，[geolocationError] [geolocationOptions]) ；
+    
+
+### 參數
+
+*   **geolocationSuccess**： 傳遞當前位置的回檔。
+
+*   **geolocationError**： *（可選）*如果錯誤發生時執行的回檔。
+
+*   **geolocationOptions**： *（可選）*地理定位選項。
 
 ### 示例
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    var ref2 = window.open(encodeURI('http://ja.m.wikipedia.org/wiki/ハングル'), '_blank', 'location=yes');
+    onSuccess 回檔 / / 此方法接受一個位置的物件，它包含 / / 目前的 GPS 座標 / / var onSuccess = function(position) {警報 (' 緯度： '+ position.coords.latitude + \n +' 經度： '+ position.coords.longitude + '\n' +' 海拔高度： '+ position.coords.altitude + \n +' 準確性： '+ position.coords.accuracy + '\n' +' 海拔高度準確性： '+ position.coords.altitudeAccuracy + '\n' +' 標題： '+ position.coords.heading + \n +' 速度： '+ position.coords.speed + '\n' +' 時間戳記： ' + position.timestamp + \n) ；} ；onError 回檔接收一個 PositionError 物件 / / 函數 onError(error) {警報 (' 代碼： '+ error.code + '\n' +' 消息： ' + error.message + \n);}navigator.geolocation.getCurrentPosition (onSuccess，onError) ；
     
 
-### 火狐瀏覽器作業系統的怪癖
+## navigator.geolocation.watchPosition
 
-外掛程式不會執行任何的設計是需要添加一些 CSS 規則，如果打開的 `target='_blank'` 。規則 》 可能看起來像這些
+當檢測到更改位置返回該設備的當前的位置。 當設備中檢索一個新的位置， `geolocationSuccess` 回檔執行與 `Position` 物件作為參數。 如果有錯誤， `geolocationError` 回檔執行與 `PositionError` 物件作為參數。
 
-     css
-    .inAppBrowserWrap {
-      background-color: rgba(0,0,0,0.75);
-      color: rgba(235,235,235,1.0);
-    }
-    .inAppBrowserWrap menu {
-      overflow: auto;
-      list-style-type: none;
-      padding-left: 0;
-    }
-    .inAppBrowserWrap menu li {
-      font-size: 25px;
-      height: 25px;
-      float: left;
-      margin: 0 10px;
-      padding: 3px 10px;
-      text-decoration: none;
-      color: #ccc;
-      display: block;
-      background: rgba(30,30,30,0.50);
-    }
-    .inAppBrowserWrap menu li.disabled {
-        color: #777;
-    }
+    var watchId = navigator.geolocation.watchPosition （geolocationSuccess，[geolocationError] [geolocationOptions]) ；
     
 
-## InAppBrowser
+### 參數
 
-從調用返回的物件`window.open`.
+*   **geolocationSuccess**： 傳遞當前位置的回檔。
 
-### 方法
+*   **geolocationError**： （可選） 如果錯誤發生時執行的回檔。
 
-*   addEventListener
-*   removeEventListener
-*   close
-*   show
-*   executeScript
-*   insertCSS
+*   **geolocationOptions**： （可選） 地理定位選項。
 
-## addEventListener
+### 返回
 
-> 為事件添加一個攔截器`InAppBrowser`.
+*   **字串**： 返回引用的觀看位置間隔的表 id。 應與一起使用的表 id `navigator.geolocation.clearWatch` 停止了觀看中位置的更改。
 
-    ref.addEventListener(eventname, callback);
+### 示例
+
+    onSuccess 回檔 / / 此方法接受一個 '立場' 物件，其中包含 / / 當前 GPS 座標 / / 函數 onSuccess(position) {var 元素 = document.getElementById('geolocation') ；element.innerHTML = '緯度:' + position.coords.latitude + '< br / >' +' 經度: '+ position.coords.longitude +' < br / >' + ' < hr / >' + element.innerHTML;} / / onError 回檔接收一個 PositionError 物件 / / 函數 onError(error) {警報 (' 代碼： '+ error.code + '\n' +' 消息： ' + error.message + \n);}如果沒有更新收到每隔 30 秒選項： 將引發錯誤。
+    var watchID = navigator.geolocation.watchPosition （onSuccess，onError，{超時： 30000});
     
 
-*   **ref**： 參考 `InAppBrowser` 視窗*(InAppBrowser)*
+## geolocationOptions
 
-*   **事件名稱**： 事件偵聽*（字串）*
-    
-    *   **loadstart**： 當觸發事件 `InAppBrowser` 開始載入一個 URL。
-    *   **loadstop**： 當觸發事件 `InAppBrowser` 完成載入一個 URL。
-    *   **loaderror**： 當觸發事件 `InAppBrowser` 載入 URL 時遇到錯誤。
-    *   **退出**： 當觸發事件 `InAppBrowser` 關閉視窗。
+若要自訂的地理定位檢索的可選參數`Position`.
 
-*   **回檔**： 執行時觸發該事件的函數。該函數通過 `InAppBrowserEvent` 物件作為參數。
-
-### InAppBrowserEvent 屬性
-
-*   **類型**： eventname，或者 `loadstart` ， `loadstop` ， `loaderror` ，或 `exit` 。*（字串）*
-
-*   **url**: 已載入的 URL。*（字串）*
-
-*   **代碼**： 僅中的情況的錯誤代碼 `loaderror` 。*（人數）*
-
-*   **消息**： 該錯誤訊息，只有在的情況下 `loaderror` 。*（字串）*
-
-### 支援的平臺
-
-*   亞馬遜火 OS
-*   Android 系統
-*   iOS
-*   Windows 8 和 8.1
-*   Windows Phone 7 和 8
-
-### 快速的示例
-
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.addEventListener('loadstart', function(event) { alert(event.url); });
+    {maximumAge: 3000，超時： 5000，enableHighAccuracy: true} ；
     
 
-## removeEventListener
+### 選項
 
-> 移除的事件攔截器`InAppBrowser`.
+*   **enableHighAccuracy**： 提供應用程式需要最佳的可能結果的提示。 預設情況下，該設備將嘗試檢索 `Position` 使用基於網路的方法。 將此屬性設置為 `true` 告訴要使用更精確的方法，如衛星定位的框架。 *(布林值)*
 
-    ref.removeEventListener(eventname, callback);
+*   **超時**： 時間 (毫秒) 從調用傳遞，允許的最大長度 `navigator.geolocation.getCurrentPosition` 或 `geolocation.watchPosition` 直到相應的 `geolocationSuccess` 回檔執行。 如果 `geolocationSuccess` 不會在此時間內調用回檔 `geolocationError` 傳遞回檔 `PositionError.TIMEOUT` 錯誤代碼。 (請注意，與一起使用時 `geolocation.watchPosition` 、 `geolocationError` 的時間間隔可以調用回檔每 `timeout` 毫秒!)*（人數）*
+
+*   **maximumAge**： 接受其年齡大於指定以毫秒為單位的時間沒有緩存的位置。*（人數）*
+
+### Android 的怪癖
+
+Android 2.x 模擬器不返回地理定位結果除非 `enableHighAccuracy` 選項設置為`true`.
+
+## navigator.geolocation.clearWatch
+
+再看對所引用的設備的位置更改為 `watchID` 參數。
+
+    navigator.geolocation.clearWatch(watchID) ；
     
 
-*   **ref**： 參考 `InAppBrowser` 視窗。*() InAppBrowser*
+### 參數
 
-*   **事件名稱**： 要停止偵聽的事件。*（字串）*
+*   **watchID**： 的 id `watchPosition` 清除的時間間隔。（字串）
+
+### 示例
+
+    選項： 監視的更改的位置，並使用最 / / 準確定位採集方法可用。
+    var watchID = navigator.geolocation.watchPosition （onSuccess，onError，{enableHighAccuracy: true});....later 上的......
     
-    *   **loadstart**： 當觸發事件 `InAppBrowser` 開始載入一個 URL。
-    *   **loadstop**： 當觸發事件 `InAppBrowser` 完成載入一個 URL。
-    *   **loaderror**： 當觸發事件 `InAppBrowser` 遇到錯誤載入一個 URL。
-    *   **退出**： 當觸發事件 `InAppBrowser` 關閉視窗。
-
-*   **回檔**: 要在事件觸發時執行的函數。該函數通過 `InAppBrowserEvent` 物件。
-
-### 支援的平臺
-
-*   亞馬遜火 OS
-*   Android 系統
-*   iOS
-*   Windows 8 和 8.1
-*   Windows Phone 7 和 8
-
-### 快速的示例
-
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    var myCallback = function(event) { alert(event.url); }
-    ref.addEventListener('loadstart', myCallback);
-    ref.removeEventListener('loadstart', myCallback);
+    navigator.geolocation.clearWatch(watchID) ；
     
 
-## close
+## Position
 
-> 關閉 `InAppBrowser` 視窗。
+包含 `Position` 座標和時間戳記，由地理位置 API 創建。
 
-    ref.close() ；
-    
+### 屬性
 
-*   **ref**： 參考 `InAppBrowser` 視窗*(InAppBrowser)*
+*   **coords**： 一組的地理座標。*（座標）*
 
-### 支援的平臺
+*   **時間戳記**： 創建時間戳記為 `coords` 。*（日期）*
 
-*   亞馬遜火 OS
-*   Android 系統
-*   火狐瀏覽器的作業系統
-*   iOS
-*   Windows 8 和 8.1
-*   Windows Phone 7 和 8
+## Coordinates
 
-### 快速的示例
+A `Coordinates` 物件附加到 `Position` 物件，可用於在當前職位的請求中的回呼函數。 它包含一組屬性，描述位置的地理座標。
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.close();
-    
+### 屬性
 
-## show
+*   **緯度**： 緯度以十進位度為單位。*（人數）*
 
-> 顯示打開了隱藏的 InAppBrowser 視窗。調用這沒有任何影響，如果 InAppBrowser 是已經可見。
+*   **經度**: 經度以十進位度為單位。*（人數）*
 
-    ref.show() ；
-    
+*   **海拔高度**： 高度在米以上橢球體中的位置。*（人數）*
 
-*   **ref**： InAppBrowser 視窗 (參考`InAppBrowser`)
+*   **準確性**： 中米的緯度和經度座標的精度級別。*（人數）*
 
-### 支援的平臺
+*   **altitudeAccuracy**： 在米的海拔高度座標的精度級別。*（人數）*
 
-*   亞馬遜火 OS
-*   Android 系統
-*   iOS
-*   Windows 8 和 8.1
+*   **標題**： 旅行，指定以度為單位元數目相對於真北順時針方向。*（人數）*
 
-### 快速的示例
+*   **速度**： 當前地面速度的設備，指定在米每秒。*（人數）*
 
-    var ref = window.open('http://apache.org', '_blank', 'hidden=yes');
-    // some time later...
-    ref.show();
-    
+### 亞馬遜火 OS 怪癖
 
-## executeScript
+**altitudeAccuracy**: 不支援的 Android 設備，返回`null`.
 
-> 注入到 JavaScript 代碼 `InAppBrowser` 視窗
+### Android 的怪癖
 
-    ref.executeScript(details, callback);
-    
+**altitudeAccuracy**: 不支援的 Android 設備，返回`null`.
 
-*   **ref**： 參考 `InAppBrowser` 視窗。*() InAppBrowser*
+## PositionError
 
-*   **injectDetails**: 要運行的腳本的詳細資訊或指定 `file` 或 `code` 的關鍵。*（物件）*
-    
-    *   **檔**： 腳本的 URL 來注入。
-    *   **代碼**： 要注入腳本的文本。
+`PositionError`物件傳遞給 `geolocationError` 與 navigator.geolocation 發生錯誤時的回呼函數。
 
-*   **回檔**： 執行後注入的 JavaScript 代碼的函數。
-    
-    *   如果插入的腳本的類型 `code` ，回檔執行使用單個參數，這是該腳本的傳回值，裹在 `Array` 。 對於多行腳本，這是最後一條語句或最後計算的運算式的傳回值。
+### 屬性
 
-### 支援的平臺
+*   **代碼**： 下面列出的預定義的錯誤代碼之一。
 
-*   亞馬遜火 OS
-*   Android 系統
-*   iOS
-*   Windows 8 和 8.1
+*   **消息**： 描述所遇到的錯誤的詳細資訊的錯誤訊息。
 
-### 快速的示例
+### 常量
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.addEventListener('loadstop', function() {
-        ref.executeScript({file: "myscript.js"});
-    });
-    
-
-## insertCSS
-
-> 注入到 CSS `InAppBrowser` 視窗。
-
-    ref.insertCSS(details, callback);
-    
-
-*   **ref**： 參考 `InAppBrowser` 視窗*(InAppBrowser)*
-
-*   **injectDetails**: 要運行的腳本的詳細資訊或指定 `file` 或 `code` 的關鍵。*（物件）*
-    
-    *   **檔**： 樣式表的 URL 來注入。
-    *   **代碼**： 文本樣式表的注入。
-
-*   **回檔**： 在 CSS 注射後執行的函數。
-
-### 支援的平臺
-
-*   亞馬遜火 OS
-*   Android 系統
-*   iOS
-
-### 快速的示例
-
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.addEventListener('loadstop', function() {
-        ref.insertCSS({file: "mystyles.css"});
-    });
+*   `PositionError.PERMISSION_DENIED` 
+    *   返回當使用者不允許應用程式檢索的位置資訊。這是取決於平臺。
+*   `PositionError.POSITION_UNAVAILABLE` 
+    *   返回設備時，不能檢索的位置。一般情況下，這意味著該設備未連接到網路或無法獲取衛星的修復。
+*   `PositionError.TIMEOUT` 
+    *   返回設備時，無法在指定的時間內檢索位置 `timeout` 中包含 `geolocationOptions` 。 與一起使用時 `navigator.geolocation.watchPosition` ，此錯誤可能反復傳遞給 `geolocationError` 回檔每 `timeout` 毫秒為單位）。

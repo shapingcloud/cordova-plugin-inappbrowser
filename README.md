@@ -17,6 +17,6 @@
          under the License.
 -->
 
-# org.apache.cordova.inappbrowser
+# org.apache.cordova.geolocation
 
 Plugin documentation: [doc/index.md](doc/index.md)

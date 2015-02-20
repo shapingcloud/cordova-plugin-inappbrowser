@@ -17,314 +17,180 @@
     under the License.
 -->
 
-# org.apache.cordova.inappbrowser
+# org.apache.cordova.geolocation
 
-このプラグインを呼び出すときに表示される web ブラウザーのビューを提供します`window.open()`.
+このプラグインは緯度や経度などのデバイスの場所に関する情報を提供します。 位置情報の共通のソースはグローバル ポジショニング システム （GPS） と IP アドレス、RFID、WiFi および Bluetooth の MAC アドレス、および GSM/cdma 方式携帯 Id などのネットワーク信号から推定される場所にもあります。 API は、デバイスの実際の場所を返すことの保証はありません。
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    
+この API は[W3C 地理位置情報 API 仕様][1]に基づいており、既に実装を提供しないデバイス上のみで実行します。
 
-**注**: ウィンドウの動作、InAppBrowser 標準的な web ブラウザーのようとコルドバの Api にアクセスできません。
+ [1]: http://dev.w3.org/geo/api/spec-source.html
+
+**警告**: 地理位置情報データの収集と利用を重要なプライバシーの問題を発生させます。 アプリのプライバシー ポリシーは他の当事者とデータ (たとえば、粗い、罰金、郵便番号レベル、等) の精度のレベルでは共有されているかどうか、アプリが地理位置情報データを使用する方法を議論すべきです。 地理位置情報データと一般に見なされる敏感なユーザーの居場所を開示することができますので、彼らの旅行の歴史保存されている場合。 したがって、アプリのプライバシー ポリシーに加えて、強くする必要があります (デバイス オペレーティング システムしない場合そう既に)、アプリケーションに地理位置情報データをアクセスする前に - 時間のお知らせを提供します。 その通知は、上記の (例えば、 **[ok]**を**おかげで**選択肢を提示する) によってユーザーのアクセス許可を取得するだけでなく、同じ情報を提供する必要があります。 詳細については、プライバシーに関するガイドを参照してください。
 
 ## インストール
 
-    cordova plugin add org.apache.cordova.inappbrowser
+    cordova plugin add org.apache.cordova.geolocation
     
 
-## window.open
-
-新しい URL を開き `InAppBrowser` インスタンス、現在のブラウザー インスタンスまたはシステムのブラウザー。
-
-    var ref = window.open(url, target, options);
-    
-
-*   **ref**: への参照を `InAppBrowser` ウィンドウ。*(InAppBrowser)*
-
-*   **url**: *(文字列)*をロードする URL。電話 `encodeURI()` 場合は、この上の URL は Unicode 文字を含みます。
-
-*   **ターゲット**: ターゲット URL は、既定値は、省略可能なパラメーターをロードするを `_self` 。*(文字列)*
-    
-    *   `_self`: コルドバ WebView URL がホワイト リストにある場合で開きます、それ以外の場合で開きます、`InAppBrowser`.
-    *   `_blank`: で開きます、`InAppBrowser`.
-    *   `_system`: システムの web ブラウザーで開きます。
-
-*   **オプション**: おぷしょん、 `InAppBrowser` 。省略可能にする: `location=yes` 。*(文字列)*
-    
-    `options`文字列にはする必要があります任意の空白スペースが含まれていないと、各機能の名前と値のペアをコンマで区切る必要があります。 機能名では大文字小文字を区別します。 以下の値をサポートするプラットフォーム。
-    
-    *   **場所**： に設定 `yes` または `no` を有効にする、 `InAppBrowser` の場所バー オンまたはオフにします。
-    
-    アンドロイドのみ：
-    
-    *   **closebuttoncaption**: [**完了**] ボタンのキャプションとして使用する文字列に設定します。
-    *   **非表示**: 設定 `yes` ブラウザーを作成して、ページの読み込みが表示されません。 Loadstop イベントは、読み込みが完了すると発生します。 省略するか設定 `no` (既定値) を開くし、通常負荷ブラウザーを持っています。
-    *   **clearcache**: に設定されている `yes` 、ブラウザーのクッキー キャッシュ クリア新しいウィンドウが開く前に
-    *   **clearsessioncache**： に設定されている `yes` はセッション cookie のキャッシュをオフに新しいウィンドウを開く前に
-    
-    iOS のみ:
-    
-    *   **closebuttoncaption**: [**完了**] ボタンのキャプションとして使用する文字列に設定します。自分でこの値をローカライズする必要があることに注意してください。
-    *   **disallowoverscroll**： に設定されている `yes` または `no` (既定値は `no` )。/UIWebViewBounce プロパティをオフにします。
-    *   **非表示**: 設定 `yes` ブラウザーを作成して、ページの読み込みが表示されません。 Loadstop イベントは、読み込みが完了すると発生します。 省略するか設定 `no` (既定値) を開くし、通常読み込みブラウザーを持っています。
-    *   **clearcache**: に設定されている `yes` 、ブラウザーのクッキー キャッシュ クリア新しいウィンドウが開く前に
-    *   **clearsessioncache**： に設定されている `yes` はセッション cookie のキャッシュをオフにすると、新しいウィンドウが開く前に
-    *   **ツールバー**: に設定されている `yes` または `no` InAppBrowser (デフォルトのツールバーのオンまたはオフを有効にするには`yes`)
-    *   **enableViewportScale**： に設定されている `yes` または `no` を (デフォルトではメタタグを介してスケーリング ビューポートを防ぐために`no`).
-    *   **mediaPlaybackRequiresUserAction**： に設定されている `yes` または `no` を HTML5 オーディオまたはビデオを自動再生 （初期設定から防ぐために`no`).
-    *   **allowInlineMediaPlayback**： に設定されている `yes` または `no` ラインで HTML5 メディア再生には、デバイス固有再生インターフェイスではなく、ブラウザー ウィンドウ内に表示するようにします。 HTML の `video` 要素を含める必要がありますまた、 `webkit-playsinline` 属性 (デフォルトは`no`)
-    *   **keyboardDisplayRequiresUserAction**： に設定されている `yes` または `no` をフォーム要素の JavaScript を介してフォーカスを受け取るときに、キーボードを開く `focus()` コール （デフォルトは`yes`).
-    *   **suppressesIncrementalRendering**： に設定されている `yes` または `no` (デフォルトでは表示される前にビューのすべての新しいコンテンツを受信するまで待機するには`no`).
-    *   **presentationstyle**： に設定されている `pagesheet` 、 `formsheet` または `fullscreen` (デフォルトでは、[プレゼンテーション スタイル][1]を設定するには`fullscreen`).
-    *   **transitionstyle**： に設定されている `fliphorizontal` 、 `crossdissolve` または `coververtical` (デフォルトでは、[トランジションのスタイル][2]を設定するには`coververtical`).
-    *   **toolbarposition**： に設定されている `top` または `bottom` (既定値は `bottom` )。上部またはウィンドウの下部にツールバーが発生します。
-    
-    Windows のみ：
-    
-    *   **非表示**: 設定 `yes` ブラウザーを作成して、ページの読み込みが表示されません。 Loadstop イベントは、読み込みが完了すると発生します。 省略するか設定 `no` (既定値) を開くし、通常読み込みブラウザーを持っています。
-
- [1]: http://developer.apple.com/library/ios/documentation/UIKit/Reference/UIViewController_Class/Reference/Reference.html#//apple_ref/occ/instp/UIViewController/modalPresentationStyle
- [2]: http://developer.apple.com/library/ios/#documentation/UIKit/Reference/UIViewController_Class/Reference/Reference.html#//apple_ref/occ/instp/UIViewController/modalTransitionStyle
-
-### サポートされているプラットフォーム
+## サポートされているプラットフォーム
 
 *   アマゾン火 OS
 *   アンドロイド
 *   ブラックベリー 10
 *   Firefox の OS
 *   iOS
-*   Windows 8 および 8.1
+*   Tizen
 *   Windows Phone 7 と 8
+*   Windows 8
+
+## メソッド
+
+*   navigator.geolocation.getCurrentPosition
+*   navigator.geolocation.watchPosition
+*   navigator.geolocation.clearWatch
+
+## オブジェクト (読み取り専用)
+
+*   Position
+*   PositionError
+*   Coordinates
+
+## navigator.geolocation.getCurrentPosition
+
+デバイスの現在の位置を返します、 `geolocationSuccess` コールバックを `Position` オブジェクトをパラメーターとして。 エラーがある場合、 `geolocationError` コールバックに渡される、 `PositionError` オブジェクト。
+
+    navigator.geolocation.getCurrentPosition （geolocationSuccess、[geolocationError] [geolocationOptions]);
+    
+
+### パラメーター
+
+*   **geolocationSuccess**: 現在の位置を渡されるコールバック。
+
+*   **geolocationError**: *(省略可能)*エラーが発生した場合に実行されるコールバック。
+
+*   **geolocationOptions**: *(オプション)*地理位置情報のオプションです。
 
 ### 例
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    var ref2 = window.open(encodeURI('http://ja.m.wikipedia.org/wiki/ハングル'), '_blank', 'location=yes');
+    onSuccess コールバック/このメソッドを含む位置のオブジェクトを受け入れる/、/現在 GPS 座標///var onSuccess function(position) = {警告 (' 緯度: '+ position.coords.latitude + '\n' +' 経度: '+ position.coords.longitude + '\n' +' 高度: '+ position.coords.altitude + '\n' +' 精度: '+ position.coords.accuracy + '\n' +' 高度精度: '+ position.coords.altitudeAccuracy + '\n' +' 見出し: '+ position.coords.heading + '\n' +' 速度: '+ position.coords.speed + '\n' +' タイムスタンプ: ' + position.timestamp + '\n');};onError コールバックが PositionError オブジェクトを受け取る//onError(error) 関数 {警告 (' コード: '+ error.code + '\n' +' メッセージ: ' + error.message + '\n');}navigator.geolocation.getCurrentPosition (onSuccess、onError);
     
 
-### Firefox OS 癖
+## navigator.geolocation.watchPosition
 
-開かれた場合にいくつかの CSS ルールを追加する必要があるプラグインは任意のデザインを適用しないよう `target='_blank'` 。これらのような規則になります。
+位置の変更が検出された場合は、デバイスの現在位置を返します。 デバイスを新しい場所を取得するとき、 `geolocationSuccess` コールバックを実行すると、 `Position` オブジェクトをパラメーターとして。 エラーがある場合、 `geolocationError` コールバックを実行すると、 `PositionError` オブジェクトをパラメーターとして。
 
-     css
-    .inAppBrowserWrap {
-      background-color: rgba(0,0,0,0.75);
-      color: rgba(235,235,235,1.0);
-    }
-    .inAppBrowserWrap menu {
-      overflow: auto;
-      list-style-type: none;
-      padding-left: 0;
-    }
-    .inAppBrowserWrap menu li {
-      font-size: 25px;
-      height: 25px;
-      float: left;
-      margin: 0 10px;
-      padding: 3px 10px;
-      text-decoration: none;
-      color: #ccc;
-      display: block;
-      background: rgba(30,30,30,0.50);
-    }
-    .inAppBrowserWrap menu li.disabled {
-        color: #777;
-    }
+    var watchId = navigator.geolocation.watchPosition （geolocationSuccess、[geolocationError] [geolocationOptions]);
     
 
-## InAppBrowser
+### パラメーター
 
-呼び出しから返されるオブジェクト`window.open`.
+*   **geolocationSuccess**: 現在の位置を渡されるコールバック。
 
-### メソッド
+*   **geolocationError**: (省略可能) エラーが発生した場合に実行されるコールバック。
 
-*   addEventListener
-*   removeEventListener
-*   close
-*   show
-*   executeScript
-*   insertCSS
+*   **geolocationOptions**: (オプション) 地理位置情報のオプションです。
 
-## addEventListener
+### 返します
 
-> イベントのリスナーを追加します、`InAppBrowser`.
+*   **文字列**: 時計の位置の間隔を参照する時計 id を返します。 時計 id で使用する必要があります `navigator.geolocation.clearWatch` 停止位置の変化を監視します。
 
-    ref.addEventListener(eventname, callback);
+### 例
+
+    onSuccess コールバック//このメソッドを含む '位置' オブジェクトを受け入れる/現在の GPS 座標///onSuccess(position) 関数 {var 要素 = document.getElementById('geolocation');element.innerHTML = '緯度:' + position.coords.latitude + '< br/>' +' 経度: '+ position.coords.longitude +' < br/>' + ' < hr/>' + element.innerHTML;}/onError コールバックが PositionError オブジェクトを受け取る///onError(error) 関数 {警告 (' コード: '+ error.code + '\n' +' メッセージ: ' + error.message + '\n');}オプション: 30 秒ごとの更新を受信しない場合エラーをスローします。
+    var watchID = navigator.geolocation.watchPosition (onError、onSuccess {タイムアウト: 30000});
     
 
-*   **ref**: への参照を `InAppBrowser` ウィンドウ*(InAppBrowser)*
+## geolocationOptions
 
-*   **eventname**: *(文字列)*をリッスンするイベント
-    
-    *   ****： イベントが発生するとき、 `InAppBrowser` の URL の読み込みが開始します。
-    *   **loadstop**： イベントが発生するとき、 `InAppBrowser` URL の読み込みが完了します。
-    *   **loaderror**： イベントが発生するとき、 `InAppBrowser` URL の読み込みでエラーが発生します。
-    *   **終了**: イベントが発生するとき、 `InAppBrowser` ウィンドウが閉じられます。
+地理位置情報の検索をカスタマイズするための省略可能なパラメーター`Position`.
 
-*   **コールバック**: イベントが発生したときに実行される関数。関数に渡されますが、 `InAppBrowserEvent` オブジェクトをパラメーターとして。
-
-### InAppBrowserEvent プロパティ
-
-*   **タイプ**: eventname どちらか `loadstart` 、 `loadstop` 、 `loaderror` 、または `exit` 。*(文字列)*
-
-*   **url**: URL が読み込まれました。*(文字列)*
-
-*   **コード**: の場合にのみ、エラー コード `loaderror` 。*(数)*
-
-*   **メッセージ**: の場合にのみ、エラー メッセージ `loaderror` 。*(文字列)*
-
-### サポートされているプラットフォーム
-
-*   アマゾン火 OS
-*   アンドロイド
-*   iOS
-*   Windows 8 および 8.1
-*   Windows Phone 7 と 8
-
-### 簡単な例
-
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.addEventListener('loadstart', function(event) { alert(event.url); });
+    {maximumAge: 3000、タイムアウト: 5000、enableHighAccuracy: true};
     
 
-## removeEventListener
+### オプション
 
-> イベントのリスナーを削除します、`InAppBrowser`.
+*   **enableHighAccuracy**： 最高の結果が、アプリケーションに必要があることのヒントを示します。 既定では、デバイスの取得を試みます、 `Position` ネットワーク ベースのメソッドを使用します。 このプロパティを設定する `true` 衛星測位などのより正確な方法を使用するためにフレームワークに指示します。 *(ブール値)*
 
-    ref.removeEventListener(eventname, callback);
+*   **タイムアウト**: への呼び出しから通過が許可される時間 (ミリ秒単位) の最大長 `navigator.geolocation.getCurrentPosition` または `geolocation.watchPosition` まで対応する、 `geolocationSuccess` コールバックを実行します。 場合は、 `geolocationSuccess` この時間内に、コールバックは呼び出されません、 `geolocationError` コールバックに渡される、 `PositionError.TIMEOUT` のエラー コード。 (と組み合わせて使用するときに注意してください `geolocation.watchPosition` の `geolocationError` 間隔でコールバックを呼び出すことができますすべて `timeout` ミリ秒 ！)*(数)*
+
+*   **maximumAge**： 年齢があるミリ秒単位で指定した時間よりも大きくないキャッシュされた位置を受け入れます。*(数)*
+
+### Android の癖
+
+限り android 2.x エミュレーター地理位置情報の結果を返さない、 `enableHighAccuracy` オプションを設定します。`true`.
+
+## navigator.geolocation.clearWatch
+
+によって参照される、デバイスの場所への変更を見て停止、 `watchID` パラメーター。
+
+    navigator.geolocation.clearWatch(watchID);
     
 
-*   **ref**: への参照を `InAppBrowser` ウィンドウ。*(InAppBrowser)*
+### パラメーター
 
-*   **eventname**: イベントのリッスンを停止します。*(文字列)*
+*   **watchID**: の id、 `watchPosition` をクリアする間隔。(文字列)
+
+### 例
+
+    オプション: の位置では、変更を監視して最も//正確な位置取得法利用可能。
+    var watchID = navigator.geolocation.watchPosition （成功すると、onError、{enableHighAccuracy: true});... うな上.
     
-    *   ****： イベントが発生するとき、 `InAppBrowser` の URL の読み込みが開始します。
-    *   **loadstop**： イベントが発生するとき、 `InAppBrowser` URL の読み込みが完了します。
-    *   **loaderror**： イベントが発生するとき、 `InAppBrowser` URL の読み込みエラーが発生します。
-    *   **終了**: イベントが発生するとき、 `InAppBrowser` ウィンドウが閉じられます。
-
-*   **コールバック**: イベントが発生するときに実行する関数。関数に渡されますが、 `InAppBrowserEvent` オブジェクト。
-
-### サポートされているプラットフォーム
-
-*   アマゾン火 OS
-*   アンドロイド
-*   iOS
-*   Windows 8 および 8.1
-*   Windows Phone 7 と 8
-
-### 簡単な例
-
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    var myCallback = function(event) { alert(event.url); }
-    ref.addEventListener('loadstart', myCallback);
-    ref.removeEventListener('loadstart', myCallback);
+    navigator.geolocation.clearWatch(watchID);
     
 
-## close
+## Position
 
-> 閉じる、 `InAppBrowser` ウィンドウ。
+含まれています `Position` 座標、地理位置情報 API で作成されたタイムスタンプ。
 
-    ref.close();
-    
+### プロパティ
 
-*   **ref**: への参照を `InAppBrowser` ウィンドウ*(InAppBrowser)*
+*   **coords**: 地理的座標のセット。*（座標）*
 
-### サポートされているプラットフォーム
+*   **タイムスタンプ**: 作成のタイムスタンプを `coords` 。*（日）*
 
-*   アマゾン火 OS
-*   アンドロイド
-*   Firefox の OS
-*   iOS
-*   Windows 8 および 8.1
-*   Windows Phone 7 と 8
+## Coordinates
 
-### 簡単な例
+A `Coordinates` オブジェクトに使用されて、 `Position` は、現在の位置のための要求でコールバック関数を利用可能なオブジェクト。 位置の地理座標を記述するプロパティのセットが含まれています。
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.close();
-    
+### プロパティ
 
-## show
+*   **緯度**: 10 度緯度。*(数)*
 
-> 隠された開かれた InAppBrowser ウィンドウが表示されます。この関数を呼び出すは影響しません、InAppBrowser が既に表示されている場合。
+*   **経度**: 10 進度の経度。*(数)*
 
-    ref.show();
-    
+*   **高度**: 楕円体上のメートルの位置の高さ。*(数)*
 
-*   **ref**: InAppBrowser ウィンドウ (への参照`InAppBrowser`)
+*   **精度**: メートルの緯度と経度座標の精度レベル。*(数)*
 
-### サポートされているプラットフォーム
+*   **altitudeAccuracy**： メートルの高度座標の精度レベル。*(数)*
 
-*   アマゾン火 OS
-*   アンドロイド
-*   iOS
-*   Windows 8 および 8.1
+*   **見出し**: 進行方向、カウント、真北から時計回りの角度で指定します。*(数)*
 
-### 簡単な例
+*   **速度**： 毎秒メートルで指定されたデバイスの現在の対地速度。*(数)*
 
-    var ref = window.open('http://apache.org', '_blank', 'hidden=yes');
-    // some time later...
-    ref.show();
-    
+### アマゾン火 OS 癖
 
-## executeScript
+**altitudeAccuracy**： 返すの Android デバイスでサポートされていません`null`.
 
-> JavaScript コードに挿入します、 `InAppBrowser` ウィンドウ
+### Android の癖
 
-    ref.executeScript(details, callback);
-    
+**altitudeAccuracy**： 返すの Android デバイスでサポートされていません`null`.
 
-*   **ref**: への参照を `InAppBrowser` ウィンドウ。*(InAppBrowser)*
+## PositionError
 
-*   **injectDetails**： 詳細を実行するスクリプトのいずれかを指定する、 `file` または `code` キー。*(オブジェクト)*
-    
-    *   **ファイル**： スクリプトの URL を注入します。
-    *   **コード**: スクリプトのテキストを挿入します。
+`PositionError`オブジェクトに渡されます、 `geolocationError` navigator.geolocation でエラーが発生した場合のコールバック関数。
 
-*   **コールバック**: JavaScript コードを注入した後に実行される関数。
-    
-    *   挿入されたスクリプトが型の場合 `code` 、スクリプトの戻り値は、1 つのパラメーターでコールバックを実行するのに包まれて、 `Array` 。 マルチライン スクリプトについては、最後のステートメントでは、または評価した最後の式の戻り値です。
+### プロパティ
 
-### サポートされているプラットフォーム
+*   **コード**: 次のいずれかの定義済みのエラー コード。
 
-*   アマゾン火 OS
-*   アンドロイド
-*   iOS
-*   Windows 8 および 8.1
+*   **メッセージ**: 発生したエラーの詳細を説明するエラー メッセージ。
 
-### 簡単な例
+### 定数
 
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.addEventListener('loadstop', function() {
-        ref.executeScript({file: "myscript.js"});
-    });
-    
-
-## insertCSS
-
-> CSS に注入する、 `InAppBrowser` ウィンドウ。
-
-    ref.insertCSS(details, callback);
-    
-
-*   **ref**: への参照を `InAppBrowser` ウィンドウ*(InAppBrowser)*
-
-*   **injectDetails**： 詳細を実行するスクリプトのいずれかを指定する、 `file` または `code` キー。*(オブジェクト)*
-    
-    *   **ファイル**: 注入するスタイル シートの URL。
-    *   **コード**: 注入するスタイル シートのテキスト。
-
-*   **コールバック**: CSS の注入後に実行される関数。
-
-### サポートされているプラットフォーム
-
-*   アマゾン火 OS
-*   アンドロイド
-*   iOS
-
-### 簡単な例
-
-    var ref = window.open('http://apache.org', '_blank', 'location=yes');
-    ref.addEventListener('loadstop', function() {
-        ref.insertCSS({file: "mystyles.css"});
-    });
+*   `PositionError.PERMISSION_DENIED` 
+    *   ユーザーの位置情報を取得するアプリを許可しない場合に返されます。これはプラットフォームに依存します。
+*   `PositionError.POSITION_UNAVAILABLE` 
+    *   デバイスが、位置を取得することができます返されます。一般に、つまり、デバイスがネットワークに接続されていないまたは衛星の修正を得ることができません。
+*   `PositionError.TIMEOUT` 
+    *   デバイスがで指定された時間内の位置を取得することができるときに返される、 `timeout` に含まれている `geolocationOptions` 。 使用すると `navigator.geolocation.watchPosition` 、このエラーが繰り返しに渡すことが、 `geolocationError` コールバックごと `timeout` (ミリ秒単位)。

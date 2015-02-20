@@ -18,451 +18,370 @@
  * under the License.
  *
 */
-
-exports.defineManualTests = function (contentEl, createActionButton) {
-
-    function doOpen(url, target, params, numExpectedRedirects) {
-        numExpectedRedirects = numExpectedRedirects || 0;
-        console.log("Opening " + url);
-        var iab = window.open(url, target, params);
-        if (!iab) {
-            alert('window.open returned ' + iab);
-            return;
-        }
-        var counts;
-        var lastLoadStartURL;
-        var wasReset = false;
-        function reset() {
-            counts = {
-                'loaderror': 0,
-                'loadstart': 0,
-                'loadstop': 0,
-                'exit': 0
-            };
-            lastLoadStartURL = '';
-        }
-        reset();
-
-        function logEvent(e) {
-            console.log('IAB event=' + JSON.stringify(e));
-            counts[e.type]++;
-            // Verify that event.url gets updated on redirects.
-            if (e.type == 'loadstart') {
-                if (e.url == lastLoadStartURL) {
-                    alert('Unexpected: loadstart fired multiple times for the same URL.');
-                }
-                lastLoadStartURL = e.url;
-            }
-            // Verify the right number of loadstart events were fired.
-            if (e.type == 'loadstop' || e.type == 'loaderror') {
-                if (e.url != lastLoadStartURL) {
-                    alert('Unexpected: ' + e.type + ' event.url != loadstart\'s event.url');
-                }
-                if (numExpectedRedirects === 0 && counts['loadstart'] !== 1) {
-                    // Do allow a loaderror without a loadstart (e.g. in the case of an invalid URL).
-                    if (!(e.type == 'loaderror' && counts['loadstart'] === 0)) {
-                        alert('Unexpected: got multiple loadstart events. (' + counts['loadstart'] + ')');
-                    }
-                } else if (numExpectedRedirects > 0 && counts['loadstart'] < (numExpectedRedirects + 1)) {
-                    alert('Unexpected: should have got at least ' + (numExpectedRedirects + 1) + ' loadstart events, but got ' + counts['loadstart']);
-                }
-                wasReset = true;
-                numExpectedRedirects = 0;
-                reset();
-            }
-            // Verify that loadend / loaderror was called.
-            if (e.type == 'exit') {
-                var numStopEvents = counts['loadstop'] + counts['loaderror'];
-                if (numStopEvents === 0 && !wasReset) {
-                    alert('Unexpected: browser closed without a loadstop or loaderror.')
-                } else if (numStopEvents > 1) {
-                    alert('Unexpected: got multiple loadstop/loaderror events.');
-                }
-            }
-        }
-        iab.addEventListener('loaderror', logEvent);
-        iab.addEventListener('loadstart', logEvent);
-        iab.addEventListener('loadstop', logEvent);
-        iab.addEventListener('exit', logEvent);
-
-        return iab;
-    }
-
-    function openWithStyle(url, cssUrl, useCallback) {
-        var iab = doOpen(url, '_blank', 'location=yes');
-        var callback = function (results) {
-            if (results && results.length === 0) {
-                alert('Results verified');
-            } else {
-                console.log(results);
-                alert('Got: ' + typeof (results) + '\n' + JSON.stringify(results));
-            }
-        };
-        if (cssUrl) {
-            iab.addEventListener('loadstop', function (event) {
-                iab.insertCSS({ file: cssUrl }, useCallback && callback);
-            });
-        } else {
-            iab.addEventListener('loadstop', function (event) {
-                iab.insertCSS({ code: '#style-update-literal { \ndisplay: block !important; \n}' },
-                              useCallback && callback);
-            });
-        }
-    }
-
-    function openWithScript(url, jsUrl, useCallback) {
-        var iab = doOpen(url, '_blank', 'location=yes');
-        if (jsUrl) {
-            iab.addEventListener('loadstop', function (event) {
-                iab.executeScript({ file: jsUrl }, useCallback && function (results) {
-                    if (results && results.length === 0) {
-                        alert('Results verified');
-                    } else {
-                        console.log(results);
-                        alert('Got: ' + typeof (results) + '\n' + JSON.stringify(results));
-                    }
-                });
-            });
-        } else {
-            iab.addEventListener('loadstop', function (event) {
-                var code = '(function(){\n' +
-                  '    var header = document.getElementById("header");\n' +
-                  '    header.innerHTML = "Script literal successfully injected";\n' +
-                  '    return "abc";\n' +
-                  '})()';
-                iab.executeScript({ code: code }, useCallback && function (results) {
-                    if (results && results.length === 1 && results[0] === 'abc') {
-                        alert('Results verified');
-                    } else {
-                        console.log(results);
-                        alert('Got: ' + typeof (results) + '\n' + JSON.stringify(results));
-                    }
-                });
-            });
-        }
-    }
-    var hiddenwnd = null;
-    var loadlistener = function (event) { alert('background window loaded '); };
-    function openHidden(url, startHidden) {
-        var shopt = (startHidden) ? 'hidden=yes' : '';
-        hiddenwnd = window.open(url, 'random_string', shopt);
-        if (!hiddenwnd) {
-            alert('window.open returned ' + hiddenwnd);
-            return;
-        }
-        if (startHidden) hiddenwnd.addEventListener('loadstop', loadlistener);
-    }
-    function showHidden() {
-        if (!!hiddenwnd) {
-            hiddenwnd.show();
-        }
-    }
-    function closeHidden() {
-        if (!!hiddenwnd) {
-            hiddenwnd.removeEventListener('loadstop', loadlistener);
-            hiddenwnd.close();
-            hiddenwnd = null;
-        }
-    }
-
-    var info_div = '<h1>InAppBrowser</h1>' +
-        '<div id="info">' +
-        'Make sure http://www.google.com and https://www.google.com are white listed. </br>' +
-        'Make sure http://www.apple.com is not in the white list.</br>' +
-        'In iOS, starred <span style="vertical-align:super">*</span> tests will put the app in a state with no way to return. </br>' +
-        '<h4>User-Agent: <span id="user-agent"> </span></hr>' +
-        '</div>';
-
-    var local_tests = '<h1>Local URL</h1>' +
-        '<div id="openLocal"></div>' +
-        'Expected result: opens successfully in CordovaWebView.' +
-        '<p/> <div id="openLocalSelf"></div>' +
-        'Expected result: opens successfully in CordovaWebView.' +
-        '<p/> <div id="openLocalSystem"></div>' +
-        'Expected result: fails to open' +
-        '<p/> <div id="openLocalBlank"></div>' +
-        'Expected result: opens successfully in InAppBrowser with locationBar at top.' +
-        '<p/> <div id="openLocalRandomNoLocation"></div>' +
-        'Expected result: opens successfully in InAppBrowser without locationBar.' +
-        '<p/> <div id="openLocalRandomToolBarBottom"></div>' +
-        'Expected result: opens successfully in InAppBrowser with locationBar. On iOS the toolbar is at the bottom.' +
-        '<p/> <div id="openLocalRandomToolBarTop"></div>' +
-        'Expected result: opens successfully in InAppBrowser with locationBar. On iOS the toolbar is at the top.' +
-        '<p/><div id="openLocalRandomToolBarTopNoLocation"></div>' +
-        'Expected result: open successfully in InAppBrowser with no locationBar. On iOS the toolbar is at the top.';
-
-    var white_listed_tests = '<h1>White Listed URL</h1>' +
-        '<div id="openWhiteListed"></div>' +
-        'Expected result: open successfully in CordovaWebView to www.google.com' +
-        '<p/> <div id="openWhiteListedSelf"></div>' +
-        'Expected result: open successfully in CordovaWebView to www.google.com' +
-        '<p/> <div id="openWhiteListedSystem"></div>' +
-        'Expected result: open successfully in system browser to www.google.com' +
-        '<p/> <div id="openWhiteListedBlank"></div>' +
-        'Expected result: open successfully in InAppBrowser to www.google.com' +
-        '<p/> <div id="openWhiteListedRandom"></div>' +
-        'Expected result: open successfully in InAppBrowser to www.google.com' +
-        '<p/> <div id="openWhiteListedRandomNoLocation"></div>' +
-        'Expected result: open successfully in InAppBrowser to www.google.com with no location bar.';
-
-    var non_white_listed_tests = '<h1>Non White Listed URL</h1>' +
-        '<div id="openNonWhiteListed"></div>' +
-        'Expected result: open successfully in InAppBrowser to apple.com (_self enforces whitelist).' +
-        '<p/> <div id="openNonWhiteListedSelf"></div>' +
-        'Expected result: open successfully in InAppBrowser to apple.com (_self enforces whitelist).' +
-        '<p/> <div id="openNonWhiteListedSystem"></div>' +
-        'Expected result: open successfully in system browser to apple.com.' +
-        '<p/> <div id="openNonWhiteListedBlank"></div>' +
-        'Expected result: open successfully in InAppBrowser to apple.com.' +
-        '<p/> <div id="openNonWhiteListedRandom"></div>' +
-        'Expected result: open successfully in InAppBrowser to apple.com.' +
-        '<p/> <div id="openNonWhiteListedRandomNoLocation"></div>' +
-        'Expected result: open successfully in InAppBrowser to apple.com without locationBar.';
-
-    var page_with_redirects_tests = '<h1>Page with redirect</h1>' +
-        '<div id="openRedirect301"></div>' +
-        'Expected result: should 301 and open successfully in InAppBrowser to www.google.com.' +
-        '<p/> <div id="openRedirect302"></div>' +
-        'Expected result: should 302 and open successfully in InAppBrowser to www.zhihu.com/answer/16714076.';
-
-    var pdf_url_tests = '<h1>PDF URL</h1>' +
-        '<div id="openPDF"></div>' +
-        'Expected result: InAppBrowser opens. PDF should render on iOS.' +
-        '<p/> <div id="openPDFBlank"></div>' +
-        'Expected result: InAppBrowser opens. PDF should render on iOS.';
-
-    var invalid_url_tests = '<h1>Invalid URL</h1>' +
-        '<div id="openInvalidScheme"></div>' +
-        'Expected result: fail to load in InAppBrowser.' +
-        '<p/> <div id="openInvalidHost"></div>' +
-        'Expected result: fail to load in InAppBrowser.' +
-        '<p/> <div id="openInvalidMissing"></div>' +
-        'Expected result: fail to load in InAppBrowser (404).';
-
-    var css_js_injection_tests = '<h1>CSS / JS Injection</h1>' +
-        '<div id="openOriginalDocument"></div>' +
-        'Expected result: open successfully in InAppBrowser without text "Style updated from..."' +
-        '<p/> <div id="openCSSInjection"></div>' +
-        'Expected result: open successfully in InAppBrowser with "Style updated from file".' +
-        '<p/> <div id="openCSSInjectionCallback"></div>' +
-        'Expected result: open successfully in InAppBrowser with "Style updated from file", and alert dialog with text "Results verified".' +
-        '<p/> <div id="openCSSLiteralInjection"></div>' +
-        'Expected result: open successfully in InAppBrowser with "Style updated from literal".' +
-        '<p/> <div id="openCSSLiteralInjectionCallback"></div>' +
-        'Expected result: open successfully in InAppBrowser with "Style updated from literal", and alert dialog with text "Results verified".' +
-        '<p/> <div id="openScriptInjection"></div>' +
-        'Expected result: open successfully in InAppBrowser with text "Script file successfully injected".' +
-        '<p/> <div id="openScriptInjectionCallback"></div>' +
-        'Expected result: open successfully in InAppBrowser with text "Script file successfully injected" and alert dialog with the text "Results verified".' +
-        '<p/> <div id="openScriptLiteralInjection"></div>' +
-        'Expected result: open successfully in InAppBrowser with the text "Script literal successfully injected" .' +
-        '<p/> <div id="openScriptLiteralInjectionCallback"></div>' +
-        'Expected result: open successfully in InAppBrowser with the text "Script literal successfully injected" and alert dialog with the text "Results verified".';
-
-    var open_hidden_tests = '<h1>Open Hidden </h1>' +
-        '<div id="openHidden"></div>' +
-        'Expected result: no additional browser window. Alert appears with the text "background window loaded".' +
-        '<p/> <div id="showHidden"></div>' +
-        'Expected result: after first clicking on previous test "create hidden", open successfully in InAppBrowser to google.com.' +
-        '<p/> <div id="closeHidden"></div>' +
-        'Expected result: no output. But click on "show hidden" again and nothing should be shown.' +
-        '<p/> <div id="openHiddenShow"></div>' +
-        'Expected result: open successfully in InAppBrowser to www.google.com';
-
-    var clearing_cache_tests = '<h1>Clearing Cache</h1>' +
-        '<div id="openClearCache"></div>' +
-        'Expected result: ?' +
-        '<p/> <div id="openClearSessionCache"></div>' +
-        'Expected result: ?';
-
-    var video_tag_tests = '<h1>Video tag</h1>' +
-        '<div id="openRemoteVideo"></div>' +
-        'Expected result: open successfully in InAppBrowser with an embedded video that works after clicking the "play" button.';
-
-    var local_with_anchor_tag_tests = '<h1>Local with anchor tag</h1>' +
-        '<div id="openAnchor1"></div>' +
-        'Expected result: open successfully in InAppBrowser to the local page, scrolled to the top as normal.' +
-        '<p/> <div id="openAnchor2"></div>' +
-        'Expected result: open successfully in InAppBrowser to the local page, scrolled to the beginning of the tall div with border.';
-
-    // CB-7490 We need to wrap this code due to Windows security restrictions
-    // see http://msdn.microsoft.com/en-us/library/windows/apps/hh465380.aspx#differences for details
-    if (window.MSApp && window.MSApp.execUnsafeLocalFunction) {
-        MSApp.execUnsafeLocalFunction(function() {
-            contentEl.innerHTML = info_div + local_tests + white_listed_tests + non_white_listed_tests + page_with_redirects_tests + pdf_url_tests + invalid_url_tests +
-                css_js_injection_tests + open_hidden_tests + clearing_cache_tests + video_tag_tests + local_with_anchor_tag_tests;
+exports.defineAutoTests = function () {
+    var fail = function (done) {
+        expect(true).toBe(false);
+        done();
+    },
+    succeed = function (done) {
+        expect(true).toBe(true);
+        // callback could be called sync so we invoke done async to make sure we know watcher id to .clear in afterEach 
+        setTimeout(function () {
+            done();
         });
-    } else {
-        contentEl.innerHTML = info_div + local_tests + white_listed_tests + non_white_listed_tests + page_with_redirects_tests + pdf_url_tests + invalid_url_tests +
-            css_js_injection_tests + open_hidden_tests + clearing_cache_tests + video_tag_tests + local_with_anchor_tag_tests;
-    }
+    };
+    var isWindowsStore = (cordova.platformId == "windows8") || (cordova.platformId == "windows" && !WinJS.Utilities.isPhone);
 
-    document.getElementById("user-agent").textContent = navigator.userAgent;
+    describe('Geolocation (navigator.geolocation)', function () {
 
-    // we are already in cdvtests directory
-    var basePath = 'iab-resources/';
-    var localhtml = basePath + 'local.html',
-        localpdf = basePath + 'local.pdf',
-        injecthtml = basePath + 'inject.html',
-        injectjs = 'inject.js',
-        injectcss = 'inject.css',
-        videohtml = basePath + 'video.html';
+        it("geolocation.spec.1 should exist", function () {
+            expect(navigator.geolocation).toBeDefined();
+        });
 
-    //Local
-    createActionButton('target=Default', function () {
-        doOpen(localhtml);
-    }, 'openLocal');
-    createActionButton('target=_self', function () {
-        doOpen(localhtml, '_self');
-    }, 'openLocalSelf');
-    createActionButton('target=_system', function () {
-        doOpen(localhtml, '_system');
-    }, 'openLocalSystem');
-    createActionButton('target=_blank', function () {
-        doOpen(localhtml, '_blank');
-    }, 'openLocalBlank');
-    createActionButton('target=Random, location=no, disallowoverscroll=yes', function () {
-        doOpen(localhtml, 'random_string', 'location=no, disallowoverscroll=yes');
-    }, 'openLocalRandomNoLocation');
-    createActionButton('target=Random, toolbarposition=bottom', function () {
-        doOpen(localhtml, 'random_string', 'toolbarposition=bottom');
-    }, 'openLocalRandomToolBarBottom');
-    createActionButton('target=Random, toolbarposition=top', function () {
-        doOpen(localhtml, 'random_string', 'toolbarposition=top');
-    }, 'openLocalRandomToolBarTop');
-    createActionButton('target=Random, toolbarposition=top, location=no', function () {
-        doOpen(localhtml, 'random_string', 'toolbarposition=top,location=no');
-    }, 'openLocalRandomToolBarTopNoLocation');
+        it("geolocation.spec.2 should contain a getCurrentPosition function", function () {
+            expect(typeof navigator.geolocation.getCurrentPosition).toBeDefined();
+            expect(typeof navigator.geolocation.getCurrentPosition == 'function').toBe(true);
+        });
 
-    //White Listed
-    createActionButton('* target=Default', function () {
-        doOpen('https://www.google.com');
-    }, 'openWhiteListed');
-    createActionButton('* target=_self', function () {
-        doOpen('https://www.google.com', '_self');
-    }, 'openWhiteListedSelf');
-    createActionButton('target=_system', function () {
-        doOpen('https://www.google.com', '_system');
-    }, 'openWhiteListedSystem');
-    createActionButton('target=_blank', function () {
-        doOpen('https://www.google.com', '_blank');
-    }, 'openWhiteListedBlank');
-    createActionButton('target=Random', function () {
-        doOpen('https://www.google.com', 'random_string');
-    }, 'openWhiteListedRandom');
-    createActionButton('* target=Random, no location bar', function () {
-        doOpen('https://www.google.com', 'random_string', 'location=no');
-    }, 'openWhiteListedRandomNoLocation');
+        it("geolocation.spec.3 should contain a watchPosition function", function () {
+            expect(typeof navigator.geolocation.watchPosition).toBeDefined();
+            expect(typeof navigator.geolocation.watchPosition == 'function').toBe(true);
+        });
 
-    //Non White Listed
-    createActionButton('target=Default', function () {
-        doOpen('http://www.apple.com');
-    }, 'openNonWhiteListed');
-    createActionButton('target=_self', function () {
-        doOpen('http://www.apple.com', '_self');
-    }, 'openNonWhiteListedSelf');
-    createActionButton('target=_system', function () {
-        doOpen('http://www.apple.com', '_system');
-    }, 'openNonWhiteListedSystem');
-    createActionButton('target=_blank', function () {
-        doOpen('http://www.apple.com', '_blank');
-    }, 'openNonWhiteListedBlank');
-    createActionButton('target=Random', function () {
-        doOpen('http://www.apple.com', 'random_string');
-    }, 'openNonWhiteListedRandom');
-    createActionButton('* target=Random, no location bar', function () {
-        doOpen('http://www.apple.com', 'random_string', 'location=no');
-    }, 'openNonWhiteListedRandomNoLocation');
+        it("geolocation.spec.4 should contain a clearWatch function", function () {
+            expect(typeof navigator.geolocation.clearWatch).toBeDefined();
+            expect(typeof navigator.geolocation.clearWatch == 'function').toBe(true);
+        });
 
-    //Page with redirect
-    createActionButton('http://google.com', function () {
-        doOpen('http://google.com', 'random_string', '', 1);
-    }, 'openRedirect301');
-    createActionButton('http://goo.gl/pUFqg', function () {
-        doOpen('http://goo.gl/pUFqg', 'random_string', '', 2);
-    }, 'openRedirect302');
+    });
 
-    //PDF URL
-    createActionButton('Remote URL', function () {
-        doOpen('http://www.stluciadance.com/prospectus_file/sample.pdf');
-    }, 'openPDF');
-    createActionButton('Local URL', function () {
-        doOpen(localpdf, '_blank');
-    }, 'openPDFBlank');
+    describe('getCurrentPosition method', function () {
 
-    //Invalid URL
-    createActionButton('Invalid Scheme', function () {
-        doOpen('x-ttp://www.invalid.com/', '_blank');
-    }, 'openInvalidScheme');
-    createActionButton('Invalid Host', function () {
-        doOpen('http://www.inv;alid.com/', '_blank');
-    }, 'openInvalidHost');
-    createActionButton('Missing Local File', function () {
-        doOpen('nonexistent.html', '_blank');
-    }, 'openInvalidMissing');
+        describe('error callback', function () {
 
-    //CSS / JS injection
-    createActionButton('Original Document', function () {
-        doOpen(injecthtml, '_blank');
-    }, 'openOriginalDocument');
-    createActionButton('CSS File Injection', function () {
-        openWithStyle(injecthtml, injectcss);
-    }, 'openCSSInjection');
-    createActionButton('CSS File Injection (callback)', function () {
-        openWithStyle(injecthtml, injectcss, true);
-    }, 'openCSSInjectionCallback');
-    createActionButton('CSS Literal Injection', function () {
-        openWithStyle(injecthtml);
-    }, 'openCSSLiteralInjection');
-    createActionButton('CSS Literal Injection (callback)', function () {
-        openWithStyle(injecthtml, null, true);
-    }, 'openCSSLiteralInjectionCallback');
-    createActionButton('Script File Injection', function () {
-        openWithScript(injecthtml, injectjs);
-    }, 'openScriptInjection');
-    createActionButton('Script File Injection (callback)', function () {
-        openWithScript(injecthtml, injectjs, true);
-    }, 'openScriptInjectionCallback');
-    createActionButton('Script Literal Injection', function () {
-        openWithScript(injecthtml);
-    }, 'openScriptLiteralInjection');
-    createActionButton('Script Literal Injection (callback)', function () {
-        openWithScript(injecthtml, null, true);
-    }, 'openScriptLiteralInjectionCallback');
+            it("geolocation.spec.5 should be called if we set timeout to 0 and maximumAge to a very small number", function (done) {
+                // this test asks for using geolocation and interrupts autotests running.
+                // That's why we have to pending that for Windows Store 8.0/8.1 apps
+                if (isWindowsStore) {
+                    pending();
+                }
+                navigator.geolocation.getCurrentPosition(
+                    fail.bind(null, done),
+                    succeed.bind(null, done),
+                    {
+                        maximumAge: 0,
+                        timeout: 0
+                    });
+            });
 
-    //Open hidden
-    createActionButton('Create Hidden', function () {
-        openHidden('https://www.google.com', true);
-    }, 'openHidden');
-    createActionButton('Show Hidden', function () {
-        showHidden();
-    }, 'showHidden');
-    createActionButton('Close Hidden', function () {
-        closeHidden();
-    }, 'closeHidden');
-    createActionButton('google.com Not Hidden', function () {
-        openHidden('https://www.google.com', false);
-    }, 'openHiddenShow');
+        });
 
-    //Clearing cache
-    createActionButton('Clear Browser Cache', function () {
-        doOpen('https://www.google.com', '_blank', 'clearcache=yes');
-    }, 'openClearCache');
-    createActionButton('Clear Session Cache', function () {
-        doOpen('https://www.google.com', '_blank', 'clearsessioncache=yes');
-    }, 'openClearSessionCache');
+        describe('success callback', function () {
 
-    //Video tag
-    createActionButton('Remote Video', function () {
-        doOpen(videohtml, '_blank');
-    }, 'openRemoteVideo');
+            it("geolocation.spec.6 should be called with a Position object", function (done) {
+                // this test asks for using geolocation and interrupts autotests running.
+                // That's why we have to pending that for Windows Store 8.0/8.1 apps
+                if (isWindowsStore) {
+                    pending();
+                }
+                navigator.geolocation.getCurrentPosition(function (p) {
+                    expect(p.coords).toBeDefined();
+                    expect(p.timestamp).toBeDefined();
+                    done();
+                },
+                fail.bind(null, done),
+                {
+                    maximumAge: 300000 // 5 minutes maximum age of cached position
+                });
+            });
 
-    //Local With Anchor Tag
-    createActionButton('Anchor1', function () {
-        doOpen(localhtml + '#bogusanchor', '_blank');
-    }, 'openAnchor1');
-    createActionButton('Anchor2', function () {
-        doOpen(localhtml + '#anchor2', '_blank');
-    }, 'openAnchor2');
+        });
+
+    });
+
+    describe('watchPosition method', function () {
+
+        describe('error callback', function () {
+
+            var errorWatch = null;
+            afterEach(function () {
+                navigator.geolocation.clearWatch(errorWatch);
+            });
+
+            it("geolocation.spec.7 should be called if we set timeout to 0 and maximumAge to a very small number", function (done) {
+                // this test asks for using geolocation and interrupts autotests running.
+                // That's why we have to pending that for Windows Store 8.0/8.1 apps
+                if (isWindowsStore) {
+                    pending();
+                }
+                errorWatch = navigator.geolocation.watchPosition(
+                    fail.bind(null, done),
+                    succeed.bind(null, done),
+                    {
+                        maximumAge: 0,
+                        timeout: 0
+                    });
+            });
+
+        });
+
+        describe('success callback', function () {
+
+            var successWatch = null;
+            afterEach(function () {
+                navigator.geolocation.clearWatch(successWatch);
+            });
+
+            it("geolocation.spec.8 should be called with a Position object", function (done) {
+                // this test asks for using geolocation and interrupts autotests running.
+                // That's why we have to pending that for Windows Store 8.0/8.1 apps
+                if (isWindowsStore) {
+                    pending();
+                }
+                var self = this;
+                successWatch = navigator.geolocation.watchPosition(
+                    function (p) {
+                        // prevents done() to be called several times
+                        if (self.done) return;
+                        self.done = true;
+
+                        expect(p.coords).toBeDefined();
+                        expect(p.timestamp).toBeDefined();
+                        // callback could be called sync so we invoke done async to make sure we know watcher id to .clear in afterEach 
+                        setTimeout(function () {
+                            done();
+                        })
+                        
+                    },
+                    fail.bind(null, done),
+                    {
+                        maximumAge: (5 * 60 * 1000) // 5 minutes maximum age of cached position
+                    });
+
+            });
+
+        });
+
+    });
+
 };
 
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+
+exports.defineManualTests = function (contentEl, createActionButton) {
+    var newGeolocation = navigator.geolocation;
+    var origGeolocation = cordova.require('cordova/modulemapper').getOriginalSymbol(window, 'navigator.geolocation');
+    if (!origGeolocation) {
+        origGeolocation = newGeolocation;
+        newGeolocation = null;
+    }
+
+    var watchLocationId = null;
+
+    /**
+     * Start watching location
+     */
+    var watchLocation = function (usePlugin) {
+        console.log("watchLocation()");
+        var geo = usePlugin ? newGeolocation : origGeolocation;
+        if (!geo) {
+            alert('geolocation object is missing. usePlugin = ' + usePlugin);
+            return;
+        }
+
+        // Success callback
+        var success = function (p) {
+            setLocationDetails(p);
+        };
+
+        // Fail callback
+        var fail = function (e) {
+            console.log("watchLocation fail callback with error code " + e);
+            stopLocation(geo);
+        };
+
+        // Get location
+        watchLocationId = geo.watchPosition(success, fail, { enableHighAccuracy: true });
+        setLocationStatus("Running");
+    };
+
+    /**
+     * Stop watching the location
+     */
+    var stopLocation = function (usePlugin) {
+        console.log("stopLocation()");
+        var geo = usePlugin ? newGeolocation : origGeolocation;
+        if (!geo) {
+            alert('geolocation object is missing. usePlugin = ' + usePlugin);
+            return;
+        }
+        setLocationStatus("Stopped");
+        if (watchLocationId) {
+            geo.clearWatch(watchLocationId);
+            watchLocationId = null;
+        }
+    };
+
+    /**
+     * Get current location
+     */
+    var getLocation = function (usePlugin, opts) {
+        console.log("getLocation()");
+        var geo = usePlugin ? newGeolocation : origGeolocation;
+        if (!geo) {
+            alert('geolocation object is missing. usePlugin = ' + usePlugin);
+            return;
+        }
+
+        // Stop location if running
+        stopLocation(geo);
+
+        // Success callback
+        var success = function (p) {
+            setLocationDetails(p);
+            setLocationStatus("Done");
+        };
+
+        // Fail callback
+        var fail = function (e) {
+            console.log("getLocation fail callback with error code " + e.code);
+            setLocationStatus("Error: " + e.code);
+        };
+
+        setLocationStatus("Retrieving location...");
+
+        // Get location
+        geo.getCurrentPosition(success, fail, opts || { enableHighAccuracy: true }); //, {timeout: 10000});
+
+    };
+
+    /**
+     * Set location status
+     */
+    var setLocationStatus = function (status) {
+        document.getElementById('location_status').innerHTML = status;
+    };
+    var setLocationDetails = function (p) {
+        var date = (new Date(p.timestamp));
+        document.getElementById('latitude').innerHTML = p.coords.latitude;
+        document.getElementById('longitude').innerHTML = p.coords.longitude;
+        document.getElementById('altitude').innerHTML = p.coords.altitude;
+        document.getElementById('accuracy').innerHTML = p.coords.accuracy;
+        document.getElementById('heading').innerHTML = p.coords.heading;
+        document.getElementById('speed').innerHTML = p.coords.speed;
+        document.getElementById('altitude_accuracy').innerHTML = p.coords.altitudeAccuracy;
+        document.getElementById('timestamp').innerHTML = date.toDateString() + " " + date.toTimeString();
+    }
+
+    /******************************************************************************/
+
+    var location_div = '<div id="info">' +
+            '<b>Status:</b> <span id="location_status">Stopped</span>' +
+            '<table width="100%">',
+        latitude = '<tr>' +
+            '<td><b>Latitude:</b></td>' +
+            '<td id="latitude">&nbsp;</td>' +
+            '<td>(decimal degrees) geographic coordinate [<a href="http://dev.w3.org/geo/api/spec-source.html#lat">#ref]</a></td>' +
+            '</tr>',
+        longitude = '<tr>' +
+            '<td><b>Longitude:</b></td>' +
+            '<td id="longitude">&nbsp;</td>' +
+            '<td>(decimal degrees) geographic coordinate [<a href="http://dev.w3.org/geo/api/spec-source.html#lat">#ref]</a></td>' +
+            '</tr>',
+        altitude = '<tr>' +
+            '<td><b>Altitude:</b></td>' +
+            '<td id="altitude">&nbsp;</td>' +
+            '<td>null if not supported;<br>' +
+            '(meters) height above the [<a href="http://dev.w3.org/geo/api/spec-source.html#ref-wgs">WGS84</a>] ellipsoid. [<a href="http://dev.w3.org/geo/api/spec-source.html#altitude">#ref]</a></td>' +
+            '</tr>',
+        accuracy = '<tr>' +
+            '<td><b>Accuracy:</b></td>' +
+            '<td id="accuracy">&nbsp;</td>' +
+            '<td>(meters; non-negative; 95% confidence level) the accuracy level of the latitude and longitude coordinates. [<a href="http://dev.w3.org/geo/api/spec-source.html#accuracy">#ref]</a></td>' +
+            '</tr>',
+        heading = '<tr>' +
+            '<td><b>Heading:</b></td>' +
+            '<td id="heading">&nbsp;</td>' +
+            '<td>null if not supported;<br>' +
+            'NaN if speed == 0;<br>' +
+            '(degrees; 0° ≤ heading < 360°) direction of travel of the hosting device- counting clockwise relative to the true north. [<a href="http://dev.w3.org/geo/api/spec-source.html#heading">#ref]</a></td>' +
+            '</tr>',
+        speed = '<tr>' +
+            '<td><b>Speed:</b></td>' +
+            '<td id="speed">&nbsp;</td>' +
+            '<td>null if not supported;<br>' +
+            '(meters per second; non-negative) magnitude of the horizontal component of the hosting device current velocity. [<a href="http://dev.w3.org/geo/api/spec-source.html#speed">#ref]</a></td>' +
+            '</tr>',
+        altitude_accuracy = '<tr>' +
+            '<td><b>Altitude Accuracy:</b></td>' +
+            '<td id="altitude_accuracy">&nbsp;</td>' +
+            '<td>null if not supported;<br>(meters; non-negative; 95% confidence level) the accuracy level of the altitude. [<a href="http://dev.w3.org/geo/api/spec-source.html#altitude-accuracy">#ref]</a></td>' +
+            '</tr>',
+        time = '<tr>' +
+            '<td><b>Time:</b></td>' +
+            '<td id="timestamp">&nbsp;</td>' +
+            '<td>(DOMTimeStamp) when the position was acquired [<a href="http://dev.w3.org/geo/api/spec-source.html#timestamp">#ref]</a></td>' +
+            '</tr>' +
+            '</table>' +
+            '</div>',
+        actions =
+            '<h2>Use Built-in WebView navigator.geolocation</h2>' +
+            '<div id="built-in-getLocation"></div>' +
+            'Expected result: Will update all applicable values in status box for current location. Status will read Retrieving Location (may not see this if location is retrieved immediately) then Done.' +
+            '<p/> <div id="built-in-watchLocation"></div>' +
+            'Expected result: Will update all applicable values in status box for current location and update as location changes. Status will read Running.' +
+            '<p/> <div id="built-in-stopLocation"></div>' +
+            'Expected result: Will stop watching the location so values will not be updated. Status will read Stopped.' +
+            '<p/> <div id="built-in-getOld"></div>' +
+            'Expected result: Will update location values with a cached position that is up to 30 seconds old. Verify with time value. Status will read Done.' +
+            '<h2>Use Cordova Geolocation Plugin</h2>' +
+            '<div id="cordova-getLocation"></div>' +
+            'Expected result: Will update all applicable values in status box for current location. Status will read Retrieving Location (may not see this if location is retrieved immediately) then Done.' +
+            '<p/> <div id="cordova-watchLocation"></div>' +
+            'Expected result: Will update all applicable values in status box for current location and update as location changes. Status will read Running.' +
+            '<p/> <div id="cordova-stopLocation"></div>' +
+            'Expected result: Will stop watching the location so values will not be updated. Status will read Stopped.' +
+            '<p/> <div id="cordova-getOld"></div>' +
+            'Expected result: Will update location values with a cached position that is up to 30 seconds old. Verify with time value. Status will read Done.',
+        values_info =
+            '<h3>Details about each value are listed below in the status box</h3>',
+        note = 
+            '<h3>Allow use of current location, if prompted</h3>';
+
+    contentEl.innerHTML = values_info + location_div + latitude + longitude + altitude + accuracy + heading + speed
+        + altitude_accuracy + time + note + actions;
+
+    createActionButton('Get Location', function () {
+        getLocation(false);
+    }, 'built-in-getLocation');
+
+    createActionButton('Start Watching Location', function () {
+        watchLocation(false);
+    }, 'built-in-watchLocation');
+
+    createActionButton('Stop Watching Location', function () {
+        stopLocation(false);
+    }, 'built-in-stopLocation');
+
+    createActionButton('Get Location Up to 30 Sec Old', function () {
+        getLocation(false, { maximumAge: 30000 });
+    }, 'built-in-getOld');
+
+    createActionButton('Get Location', function () {
+        getLocation(true);
+    }, 'cordova-getLocation');
+
+    createActionButton('Start Watching Location', function () {
+        watchLocation(true);
+    }, 'cordova-watchLocation');
+
+    createActionButton('Stop Watching Location', function () {
+        stopLocation(true);
+    }, 'cordova-stopLocation');
+
+    createActionButton('Get Location Up to 30 Sec Old', function () {
+        getLocation(true, { maximumAge: 30000 });
+    }, 'cordova-getOld');
+};
